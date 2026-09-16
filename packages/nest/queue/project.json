@@ -1,0 +1,31 @@
+{
+  "name": "@signa/nest-queue",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/nest/queue/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/nest/queue/dist",
+        "main": "packages/nest/queue/src/index.ts",
+        "tsConfig": "packages/nest/queue/tsconfig.lib.json",
+        "assets": ["packages/nest/queue/src/assets"],
+        "stripLeadingPaths": true
+      },
+      "configurations": {
+        "development": {
+          "sourceMap": true,
+          "optimization": false,
+          "swcrc": "packages/nest/queue/.swcrc"
+        },
+        "production": {
+          "sourceMap": false,
+          "optimization": true,
+          "swcrc": "packages/nest/queue/.prod.swcrc"
+        }
+      }
+    }
+  }
+}

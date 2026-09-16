@@ -1,0 +1,73 @@
+{
+  "name": "@signa/runtime-drizzle",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/runtime/drizzle/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/runtime/drizzle/dist",
+        "main": "packages/runtime/drizzle/src/index.ts",
+        "tsConfig": "packages/runtime/drizzle/tsconfig.lib.json",
+        "assets": [
+          "packages/runtime/drizzle/src/assets",
+          {
+            "input": "packages/runtime/drizzle/src/migrations",
+            "glob": "**/*",
+            "output": "migrations"
+          }
+        ],
+        "stripLeadingPaths": true
+      },
+      "configurations": {
+        "development": {
+          "sourceMap": true,
+          "optimization": false,
+          "swcrc": "packages/runtime/drizzle/.swcrc"
+        },
+        "production": {
+          "sourceMap": false,
+          "optimization": true,
+          "swcrc": "packages/runtime/drizzle/.prod.swcrc"
+        }
+      }
+    },
+    "db:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit generate",
+        "cwd": "packages/runtime/drizzle"
+      }
+    },
+    "db:generate-custom": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit generate --custom",
+        "cwd": "packages/runtime/drizzle"
+      }
+    },
+    "db:migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit migrate",
+        "cwd": "packages/runtime/drizzle"
+      }
+    },
+    "db:push": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit push",
+        "cwd": "packages/runtime/drizzle"
+      }
+    },
+    "db:studio": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit studio",
+        "cwd": "packages/runtime/drizzle"
+      }
+    }
+  }
+}

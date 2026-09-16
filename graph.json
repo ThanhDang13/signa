@@ -1,0 +1,1770 @@
+{
+  "graph": {
+    "nodes": {
+      "@signa/runtime-fetch-client": {
+        "name": "@signa/runtime-fetch-client",
+        "type": "lib",
+        "data": {
+          "root": "packages/runtime/fetch-client",
+          "targets": {
+            "typecheck": {
+              "dependsOn": [
+                "build",
+                "^typecheck"
+              ],
+              "cache": true,
+              "inputs": [
+                "{projectRoot}/package.json",
+                "{workspaceRoot}/tsconfig.base.json",
+                "{projectRoot}/tsconfig.json",
+                "{projectRoot}/tsconfig.lib.json",
+                "{projectRoot}/src/**/*.ts",
+                {
+                  "dependentTasksOutputFiles": "**/*.{d.ts,d.cts,d.mts,tsbuildinfo}",
+                  "transitive": true
+                },
+                {
+                  "fileset": "{projectRoot}/**/*.{d.ts,d.cts,d.mts}",
+                  "dependencies": true
+                },
+                "^{projectRoot}/tsconfig.lib.json"
+              ],
+              "outputs": [
+                "{projectRoot}/tsconfig.tsbuildinfo",
+                "{projectRoot}/dist/**/*.{d.ts,d.cts,d.mts}",
+                "{projectRoot}/dist/**/*.{d.ts,d.cts,d.mts}.map",
+                "{projectRoot}/dist/tsconfig.lib.tsbuildinfo"
+              ],
+              "syncGenerators": [
+                "@nx/js:typescript-sync"
+              ],
+              "metadata": {
+                "technologies": [
+                  "typescript"
+                ],
+                "description": "Runs type-checking for the project.",
+                "help": {
+                  "command": "pnpm exec tsc --build --help",
+                  "example": {
+                    "args": [
+                      "--force"
+                    ]
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "options": {
+                "cwd": "packages/runtime/fetch-client",
+                "command": "tsc --build tsconfig.json --emitDeclarationOnly"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "packages/runtime/fetch-client/dist",
+                "main": "packages/runtime/fetch-client/src/index.ts",
+                "tsConfig": "packages/runtime/fetch-client/tsconfig.lib.json",
+                "assets": [],
+                "stripLeadingPaths": true
+              },
+              "configurations": {
+                "development": {
+                  "sourceMap": true,
+                  "optimization": false,
+                  "swcrc": "packages/runtime/fetch-client/.swcrc"
+                },
+                "production": {
+                  "sourceMap": false,
+                  "optimization": true,
+                  "swcrc": "packages/runtime/fetch-client/.prod.swcrc"
+                }
+              },
+              "parallelism": true
+            },
+            "build-deps": {
+              "dependsOn": [
+                "^build"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "executor": "nx:noop"
+            },
+            "watch-deps": {
+              "continuous": true,
+              "dependsOn": [
+                "build-deps"
+              ],
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "pnpm exec nx watch --projects @signa/runtime-fetch-client --includeDependencies -- pnpm exec nx build-deps @signa/runtime-fetch-client"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/packages/runtime/fetch-client/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "pnpm exec eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "options": {
+                "cwd": "packages/runtime/fetch-client",
+                "command": "eslint ."
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "@signa/runtime-fetch-client",
+          "tags": [
+            "npm:private"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@signa/runtime-fetch-client",
+              "packageVersion": "0.0.1",
+              "packageExports": {
+                "./package.json": "./package.json",
+                ".": {
+                  "@signa/source": "./src/index.ts",
+                  "types": "./dist/index.d.ts",
+                  "import": "./dist/index.js",
+                  "default": "./dist/index.js"
+                }
+              },
+              "packageMain": "./index.js",
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "packages/runtime/fetch-client/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "@signa/dsl-http-contract": {
+        "name": "@signa/dsl-http-contract",
+        "type": "lib",
+        "data": {
+          "root": "packages/dsl/http-contract",
+          "targets": {
+            "typecheck": {
+              "dependsOn": [
+                "build",
+                "^typecheck"
+              ],
+              "cache": true,
+              "inputs": [
+                "{projectRoot}/package.json",
+                "{workspaceRoot}/tsconfig.base.json",
+                "{projectRoot}/tsconfig.json",
+                "{projectRoot}/tsconfig.lib.json",
+                "{projectRoot}/src/**/*.ts",
+                {
+                  "dependentTasksOutputFiles": "**/*.{d.ts,d.cts,d.mts,tsbuildinfo}",
+                  "transitive": true
+                },
+                {
+                  "fileset": "{projectRoot}/**/*.{d.ts,d.cts,d.mts}",
+                  "dependencies": true
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/tsconfig.tsbuildinfo",
+                "{projectRoot}/dist/**/*.{d.ts,d.cts,d.mts}",
+                "{projectRoot}/dist/**/*.{d.ts,d.cts,d.mts}.map",
+                "{projectRoot}/dist/tsconfig.lib.tsbuildinfo"
+              ],
+              "syncGenerators": [
+                "@nx/js:typescript-sync"
+              ],
+              "metadata": {
+                "technologies": [
+                  "typescript"
+                ],
+                "description": "Runs type-checking for the project.",
+                "help": {
+                  "command": "pnpm exec tsc --build --help",
+                  "example": {
+                    "args": [
+                      "--force"
+                    ]
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "options": {
+                "cwd": "packages/dsl/http-contract",
+                "command": "tsc --build tsconfig.json --emitDeclarationOnly"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "packages/dsl/http-contract/dist",
+                "main": "packages/dsl/http-contract/src/index.ts",
+                "tsConfig": "packages/dsl/http-contract/tsconfig.lib.json",
+                "assets": [
+                  "packages/dsl/http-contract/src/assets"
+                ],
+                "stripLeadingPaths": true
+              },
+              "configurations": {
+                "development": {
+                  "sourceMap": true,
+                  "optimization": false,
+                  "swcrc": "packages/dsl/http-contract/.swcrc"
+                },
+                "production": {
+                  "sourceMap": false,
+                  "optimization": true,
+                  "swcrc": "packages/dsl/http-contract/.prod.swcrc"
+                }
+              },
+              "parallelism": true
+            },
+            "build-deps": {
+              "dependsOn": [
+                "^build"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "executor": "nx:noop"
+            },
+            "watch-deps": {
+              "continuous": true,
+              "dependsOn": [
+                "build-deps"
+              ],
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "pnpm exec nx watch --projects @signa/dsl-http-contract --includeDependencies -- pnpm exec nx build-deps @signa/dsl-http-contract"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/packages/dsl/http-contract/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "pnpm exec eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "options": {
+                "cwd": "packages/dsl/http-contract",
+                "command": "eslint ."
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "@signa/dsl-http-contract",
+          "tags": [
+            "npm:private"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@signa/dsl-http-contract",
+              "packageVersion": "0.0.1",
+              "packageExports": {
+                "./package.json": "./package.json",
+                ".": {
+                  "@signa/source": "./src/index.ts",
+                  "types": "./dist/index.d.ts",
+                  "import": "./dist/index.js",
+                  "default": "./dist/index.js"
+                }
+              },
+              "packageMain": "./index.js",
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "packages/dsl/http-contract/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "@signa/dsl-http-client": {
+        "name": "@signa/dsl-http-client",
+        "type": "lib",
+        "data": {
+          "root": "packages/dsl/http-client",
+          "targets": {
+            "typecheck": {
+              "dependsOn": [
+                "build",
+                "^typecheck"
+              ],
+              "cache": true,
+              "inputs": [
+                "{projectRoot}/package.json",
+                "{workspaceRoot}/tsconfig.base.json",
+                "{projectRoot}/tsconfig.json",
+                "{projectRoot}/tsconfig.lib.json",
+                "{projectRoot}/src/**/*.ts",
+                {
+                  "dependentTasksOutputFiles": "**/*.{d.ts,d.cts,d.mts,tsbuildinfo}",
+                  "transitive": true
+                },
+                {
+                  "fileset": "{projectRoot}/**/*.{d.ts,d.cts,d.mts}",
+                  "dependencies": true
+                },
+                "^{projectRoot}/tsconfig.lib.json"
+              ],
+              "outputs": [
+                "{projectRoot}/tsconfig.tsbuildinfo",
+                "{projectRoot}/dist/**/*.{d.ts,d.cts,d.mts}",
+                "{projectRoot}/dist/**/*.{d.ts,d.cts,d.mts}.map",
+                "{projectRoot}/dist/tsconfig.lib.tsbuildinfo"
+              ],
+              "syncGenerators": [
+                "@nx/js:typescript-sync"
+              ],
+              "metadata": {
+                "technologies": [
+                  "typescript"
+                ],
+                "description": "Runs type-checking for the project.",
+                "help": {
+                  "command": "pnpm exec tsc --build --help",
+                  "example": {
+                    "args": [
+                      "--force"
+                    ]
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "options": {
+                "cwd": "packages/dsl/http-client",
+                "command": "tsc --build tsconfig.json --emitDeclarationOnly"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "packages/dsl/http-client/dist",
+                "main": "packages/dsl/http-client/src/index.ts",
+                "tsConfig": "packages/dsl/http-client/tsconfig.lib.json",
+                "assets": [
+                  "packages/dsl/http-client/src/assets"
+                ],
+                "stripLeadingPaths": true
+              },
+              "configurations": {
+                "development": {
+                  "sourceMap": true,
+                  "optimization": false,
+                  "swcrc": "packages/dsl/http-client/.swcrc"
+                },
+                "production": {
+                  "sourceMap": false,
+                  "optimization": true,
+                  "swcrc": "packages/dsl/http-client/.prod.swcrc"
+                }
+              },
+              "parallelism": true
+            },
+            "build-deps": {
+              "dependsOn": [
+                "^build"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "executor": "nx:noop"
+            },
+            "watch-deps": {
+              "continuous": true,
+              "dependsOn": [
+                "build-deps"
+              ],
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "pnpm exec nx watch --projects @signa/dsl-http-client --includeDependencies -- pnpm exec nx build-deps @signa/dsl-http-client"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/packages/dsl/http-client/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "pnpm exec eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "options": {
+                "cwd": "packages/dsl/http-client",
+                "command": "eslint ."
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "@signa/dsl-http-client",
+          "tags": [
+            "npm:private"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@signa/dsl-http-client",
+              "packageVersion": "0.0.1",
+              "packageExports": {
+                "./package.json": "./package.json",
+                ".": {
+                  "@signa/source": "./src/index.ts",
+                  "types": "./dist/index.d.ts",
+                  "import": "./dist/index.js",
+                  "default": "./dist/index.js"
+                }
+              },
+              "packageMain": "./index.js",
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "packages/dsl/http-client/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "@signa/contracts-http": {
+        "name": "@signa/contracts-http",
+        "type": "lib",
+        "data": {
+          "root": "packages/contracts/http",
+          "targets": {
+            "typecheck": {
+              "dependsOn": [
+                "build",
+                "^typecheck"
+              ],
+              "cache": true,
+              "inputs": [
+                "{projectRoot}/package.json",
+                "{workspaceRoot}/tsconfig.base.json",
+                "{projectRoot}/tsconfig.json",
+                "{projectRoot}/tsconfig.lib.json",
+                "{projectRoot}/src/**/*.ts",
+                {
+                  "dependentTasksOutputFiles": "**/*.{d.ts,d.cts,d.mts,tsbuildinfo}",
+                  "transitive": true
+                },
+                {
+                  "fileset": "{projectRoot}/**/*.{d.ts,d.cts,d.mts}",
+                  "dependencies": true
+                },
+                "^{projectRoot}/tsconfig.lib.json"
+              ],
+              "outputs": [
+                "{projectRoot}/tsconfig.tsbuildinfo",
+                "{projectRoot}/dist/**/*.{d.ts,d.cts,d.mts}",
+                "{projectRoot}/dist/**/*.{d.ts,d.cts,d.mts}.map",
+                "{projectRoot}/dist/tsconfig.lib.tsbuildinfo"
+              ],
+              "syncGenerators": [
+                "@nx/js:typescript-sync"
+              ],
+              "metadata": {
+                "technologies": [
+                  "typescript"
+                ],
+                "description": "Runs type-checking for the project.",
+                "help": {
+                  "command": "pnpm exec tsc --build --help",
+                  "example": {
+                    "args": [
+                      "--force"
+                    ]
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "options": {
+                "cwd": "packages/contracts/http",
+                "command": "tsc --build tsconfig.json --emitDeclarationOnly"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "packages/contracts/http/dist",
+                "main": "packages/contracts/http/src/index.ts",
+                "tsConfig": "packages/contracts/http/tsconfig.lib.json",
+                "assets": [
+                  "packages/contracts/http/src/assets"
+                ],
+                "stripLeadingPaths": true
+              },
+              "configurations": {
+                "development": {
+                  "sourceMap": true,
+                  "optimization": false,
+                  "swcrc": "packages/contracts/http/.swcrc"
+                },
+                "production": {
+                  "sourceMap": false,
+                  "optimization": true,
+                  "swcrc": "packages/contracts/http/.prod.swcrc"
+                }
+              },
+              "parallelism": true
+            },
+            "build-deps": {
+              "dependsOn": [
+                "^build"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "executor": "nx:noop"
+            },
+            "watch-deps": {
+              "continuous": true,
+              "dependsOn": [
+                "build-deps"
+              ],
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "pnpm exec nx watch --projects @signa/contracts-http --includeDependencies -- pnpm exec nx build-deps @signa/contracts-http"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/packages/contracts/http/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "pnpm exec eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "options": {
+                "cwd": "packages/contracts/http",
+                "command": "eslint ."
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "@signa/contracts-http",
+          "tags": [
+            "npm:private"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@signa/contracts-http",
+              "packageVersion": "0.0.1",
+              "packageExports": {
+                "./package.json": "./package.json",
+                ".": {
+                  "@signa/source": "./src/index.ts",
+                  "types": "./dist/index.d.ts",
+                  "import": "./dist/index.js",
+                  "default": "./dist/index.js"
+                },
+                "./identity": {
+                  "@signa/source": "./src/identity/index.ts",
+                  "types": "./dist/identity/index.d.ts",
+                  "import": "./dist/identity/index.js",
+                  "default": "./dist/identity/index.js"
+                },
+                "./election": {
+                  "@signa/source": "./src/election/index.ts",
+                  "types": "./dist/election/index.d.ts",
+                  "import": "./dist/election/index.js",
+                  "default": "./dist/election/index.js"
+                },
+                "./ballot": {
+                  "@signa/source": "./src/ballot/index.ts",
+                  "types": "./dist/ballot/index.d.ts",
+                  "import": "./dist/ballot/index.js",
+                  "default": "./dist/ballot/index.js"
+                }
+              },
+              "packageMain": "./index.js",
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "packages/contracts/http/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "@signa/runtime-error": {
+        "name": "@signa/runtime-error",
+        "type": "lib",
+        "data": {
+          "root": "packages/runtime/error",
+          "targets": {
+            "typecheck": {
+              "dependsOn": [
+                "build",
+                "^typecheck"
+              ],
+              "cache": true,
+              "inputs": [
+                "{projectRoot}/package.json",
+                "{workspaceRoot}/tsconfig.base.json",
+                "{projectRoot}/tsconfig.json",
+                "{projectRoot}/tsconfig.lib.json",
+                "{projectRoot}/src/**/*.ts",
+                {
+                  "dependentTasksOutputFiles": "**/*.{d.ts,d.cts,d.mts,tsbuildinfo}",
+                  "transitive": true
+                },
+                {
+                  "fileset": "{projectRoot}/**/*.{d.ts,d.cts,d.mts}",
+                  "dependencies": true
+                },
+                "^{projectRoot}/tsconfig.lib.json",
+                "^{projectRoot}/tsconfig.json"
+              ],
+              "outputs": [
+                "{projectRoot}/tsconfig.tsbuildinfo",
+                "{projectRoot}/dist/**/*.{d.ts,d.cts,d.mts}",
+                "{projectRoot}/dist/**/*.{d.ts,d.cts,d.mts}.map",
+                "{projectRoot}/dist/tsconfig.lib.tsbuildinfo"
+              ],
+              "syncGenerators": [
+                "@nx/js:typescript-sync"
+              ],
+              "metadata": {
+                "technologies": [
+                  "typescript"
+                ],
+                "description": "Runs type-checking for the project.",
+                "help": {
+                  "command": "pnpm exec tsc --build --help",
+                  "example": {
+                    "args": [
+                      "--force"
+                    ]
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "options": {
+                "cwd": "packages/runtime/error",
+                "command": "tsc --build tsconfig.json --emitDeclarationOnly"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "packages/runtime/error/dist",
+                "main": "packages/runtime/error/src/index.ts",
+                "tsConfig": "packages/runtime/error/tsconfig.lib.json",
+                "assets": [],
+                "stripLeadingPaths": true
+              },
+              "configurations": {
+                "development": {
+                  "sourceMap": true,
+                  "optimization": false,
+                  "swcrc": "packages/runtime/error/.swcrc"
+                },
+                "production": {
+                  "sourceMap": false,
+                  "optimization": true,
+                  "swcrc": "packages/runtime/error/.prod.swcrc"
+                }
+              },
+              "parallelism": true
+            },
+            "build-deps": {
+              "dependsOn": [
+                "^build"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "executor": "nx:noop"
+            },
+            "watch-deps": {
+              "continuous": true,
+              "dependsOn": [
+                "build-deps"
+              ],
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "pnpm exec nx watch --projects @signa/runtime-error --includeDependencies -- pnpm exec nx build-deps @signa/runtime-error"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/packages/runtime/error/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "pnpm exec eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "options": {
+                "cwd": "packages/runtime/error",
+                "command": "eslint ."
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "@signa/runtime-error",
+          "tags": [
+            "npm:private"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@signa/runtime-error",
+              "packageVersion": "0.0.1",
+              "packageExports": {
+                "./package.json": "./package.json",
+                ".": {
+                  "@signa/source": "./src/index.ts",
+                  "types": "./dist/index.d.ts",
+                  "import": "./dist/index.js",
+                  "default": "./dist/index.js"
+                }
+              },
+              "packageMain": "./index.js",
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "packages/runtime/error/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "@signa/dsl-error": {
+        "name": "@signa/dsl-error",
+        "type": "lib",
+        "data": {
+          "root": "packages/dsl/error",
+          "targets": {
+            "typecheck": {
+              "dependsOn": [
+                "build",
+                "^typecheck"
+              ],
+              "cache": true,
+              "inputs": [
+                "{projectRoot}/package.json",
+                "{workspaceRoot}/tsconfig.base.json",
+                "{projectRoot}/tsconfig.json",
+                "{projectRoot}/tsconfig.lib.json",
+                "{projectRoot}/src/**/*.ts",
+                "!{projectRoot}/src/**/*.spec.ts",
+                "!{projectRoot}/src/**/*.test.ts",
+                {
+                  "dependentTasksOutputFiles": "**/*.{d.ts,d.cts,d.mts,tsbuildinfo}",
+                  "transitive": true
+                },
+                {
+                  "fileset": "{projectRoot}/**/*.{d.ts,d.cts,d.mts}",
+                  "dependencies": true
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/tsconfig.tsbuildinfo",
+                "{projectRoot}/dist/**/*.{d.ts,d.cts,d.mts}",
+                "{projectRoot}/dist/**/*.{d.ts,d.cts,d.mts}.map",
+                "{projectRoot}/dist/tsconfig.lib.tsbuildinfo"
+              ],
+              "syncGenerators": [
+                "@nx/js:typescript-sync"
+              ],
+              "metadata": {
+                "technologies": [
+                  "typescript"
+                ],
+                "description": "Runs type-checking for the project.",
+                "help": {
+                  "command": "pnpm exec tsc --build --help",
+                  "example": {
+                    "args": [
+                      "--force"
+                    ]
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "options": {
+                "cwd": "packages/dsl/error",
+                "command": "tsc --build tsconfig.json --emitDeclarationOnly"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "packages/dsl/error/dist",
+                "main": "packages/dsl/error/src/index.ts",
+                "tsConfig": "packages/dsl/error/tsconfig.lib.json",
+                "assets": [
+                  "packages/dsl/error/src/assets"
+                ],
+                "stripLeadingPaths": true
+              },
+              "configurations": {
+                "development": {
+                  "sourceMap": true,
+                  "optimization": false,
+                  "swcrc": "packages/dsl/error/.swcrc"
+                },
+                "production": {
+                  "sourceMap": false,
+                  "optimization": true,
+                  "swcrc": "packages/dsl/error/.prod.swcrc"
+                }
+              },
+              "parallelism": true
+            },
+            "build-deps": {
+              "dependsOn": [
+                "^build"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "executor": "nx:noop"
+            },
+            "watch-deps": {
+              "continuous": true,
+              "dependsOn": [
+                "build-deps"
+              ],
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "pnpm exec nx watch --projects @signa/dsl-error --includeDependencies -- pnpm exec nx build-deps @signa/dsl-error"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/packages/dsl/error/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "pnpm exec eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "options": {
+                "cwd": "packages/dsl/error",
+                "command": "eslint ."
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "@signa/dsl-error",
+          "tags": [
+            "npm:private"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@signa/dsl-error",
+              "packageVersion": "0.0.1",
+              "packageExports": {
+                "./package.json": "./package.json",
+                ".": {
+                  "@signa/source": "./src/index.ts",
+                  "types": "./dist/index.d.ts",
+                  "import": "./dist/index.js",
+                  "default": "./dist/index.js"
+                }
+              },
+              "packageMain": "./index.js",
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "packages/dsl/error/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "@signa/configs": {
+        "name": "@signa/configs",
+        "type": "lib",
+        "data": {
+          "root": "packages/configs",
+          "targets": {
+            "lint": {
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/packages/configs/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "pnpm exec eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "options": {
+                "cwd": "packages/configs",
+                "command": "eslint ."
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "@signa/configs",
+          "tags": [
+            "npm:private"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@signa/configs",
+              "packageVersion": "0.0.1",
+              "packageExports": {
+                "./eslint": "./eslint.config.mjs",
+                "./eslint-nest": "./nest-eslint.config.mjs",
+                "./prettier": "./prettier.config.js"
+              },
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "implicitDependencies": []
+        }
+      },
+      "@signa/shared": {
+        "name": "@signa/shared",
+        "type": "lib",
+        "data": {
+          "root": "packages/shared",
+          "targets": {
+            "typecheck": {
+              "dependsOn": [
+                "build",
+                "^typecheck"
+              ],
+              "cache": true,
+              "inputs": [
+                "{projectRoot}/package.json",
+                "{workspaceRoot}/tsconfig.base.json",
+                "{projectRoot}/tsconfig.json",
+                "{projectRoot}/tsconfig.lib.json",
+                "{projectRoot}/src/**/*.ts",
+                {
+                  "dependentTasksOutputFiles": "**/*.{d.ts,d.cts,d.mts,tsbuildinfo}",
+                  "transitive": true
+                },
+                {
+                  "fileset": "{projectRoot}/**/*.{d.ts,d.cts,d.mts}",
+                  "dependencies": true
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/tsconfig.tsbuildinfo",
+                "{projectRoot}/dist/**/*.{d.ts,d.cts,d.mts}",
+                "{projectRoot}/dist/**/*.{d.ts,d.cts,d.mts}.map",
+                "{projectRoot}/dist/tsconfig.lib.tsbuildinfo"
+              ],
+              "syncGenerators": [
+                "@nx/js:typescript-sync"
+              ],
+              "metadata": {
+                "technologies": [
+                  "typescript"
+                ],
+                "description": "Runs type-checking for the project.",
+                "help": {
+                  "command": "pnpm exec tsc --build --help",
+                  "example": {
+                    "args": [
+                      "--force"
+                    ]
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "options": {
+                "cwd": "packages/shared",
+                "command": "tsc --build tsconfig.json --emitDeclarationOnly"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "packages/shared/dist",
+                "main": "packages/shared/src/index.ts",
+                "tsConfig": "packages/shared/tsconfig.lib.json",
+                "assets": [
+                  "packages/shared/src/assets"
+                ],
+                "stripLeadingPaths": true
+              },
+              "configurations": {
+                "development": {
+                  "sourceMap": true,
+                  "optimization": false,
+                  "swcrc": "packages/shared/.swcrc"
+                },
+                "production": {
+                  "sourceMap": false,
+                  "optimization": true,
+                  "swcrc": "packages/shared/.prod.swcrc"
+                }
+              },
+              "parallelism": true
+            },
+            "build-deps": {
+              "dependsOn": [
+                "^build"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "executor": "nx:noop"
+            },
+            "watch-deps": {
+              "continuous": true,
+              "dependsOn": [
+                "build-deps"
+              ],
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "pnpm exec nx watch --projects @signa/shared --includeDependencies -- pnpm exec nx build-deps @signa/shared"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/packages/shared/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "pnpm exec eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "options": {
+                "cwd": "packages/shared",
+                "command": "eslint ."
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "@signa/shared",
+          "tags": [
+            "npm:private"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@signa/shared",
+              "packageVersion": "0.0.1",
+              "packageExports": {
+                "./package.json": "./package.json",
+                ".": {
+                  "@signa/source": "./src/index.ts",
+                  "types": "./dist/index.d.ts",
+                  "import": "./dist/index.js",
+                  "default": "./dist/index.js"
+                }
+              },
+              "packageMain": "./index.js",
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "packages/shared/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "@signa/android": {
+        "name": "@signa/android",
+        "type": "app",
+        "data": {
+          "root": "apps/android",
+          "targets": {
+            "typecheck": {
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "tsc --noEmit",
+                "cwd": "apps/android"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/apps/android/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "pnpm exec eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "options": {
+                "cwd": "apps/android",
+                "command": "eslint ."
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "android": {
+              "executor": "nx:run-script",
+              "metadata": {
+                "scriptContent": "expo run:android",
+                "runCommand": "pnpm run android"
+              },
+              "options": {
+                "script": "android"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "ios": {
+              "executor": "nx:run-script",
+              "metadata": {
+                "scriptContent": "expo run:ios",
+                "runCommand": "pnpm run ios"
+              },
+              "options": {
+                "script": "ios"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "start": {
+              "executor": "@nx/expo:start",
+              "options": {
+                "port": 8081
+              },
+              "configurations": {
+                "development": {
+                  "devClient": true
+                },
+                "production": {
+                  "dev": false
+                }
+              },
+              "parallelism": true,
+              "continuous": true
+            },
+            "serve": {
+              "executor": "@nx/expo:serve",
+              "options": {
+                "port": 8081
+              },
+              "configurations": {},
+              "parallelism": true,
+              "continuous": true
+            },
+            "run-ios": {
+              "executor": "@nx/expo:run",
+              "dependsOn": [
+                "sync-deps"
+              ],
+              "options": {
+                "platform": "ios"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "continuous": true
+            },
+            "run-android": {
+              "executor": "@nx/expo:run",
+              "dependsOn": [
+                "sync-deps"
+              ],
+              "options": {
+                "platform": "android"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "continuous": true
+            },
+            "export": {
+              "executor": "@nx/expo:export",
+              "options": {
+                "platform": "all",
+                "outputDir": "dist/apps/android"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "sync-deps": {
+              "executor": "nx:run-commands",
+              "dependsOn": [
+                {
+                  "target": "build",
+                  "projects": "dependencies"
+                }
+              ],
+              "options": {
+                "command": "echo 'Dependencies synced'"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "prebuild": {
+              "executor": "@nx/expo:prebuild",
+              "options": {
+                "clean": false
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "install": {
+              "executor": "@nx/expo:install",
+              "configurations": {},
+              "options": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/expo:build",
+              "dependsOn": [
+                "sync-deps"
+              ],
+              "options": {
+                "platform": "android",
+                "profile": "development"
+              },
+              "configurations": {
+                "development": {
+                  "profile": "development"
+                },
+                "preview": {
+                  "profile": "preview"
+                },
+                "production": {
+                  "profile": "production"
+                }
+              },
+              "parallelism": true
+            },
+            "submit": {
+              "executor": "@nx/expo:submit",
+              "options": {
+                "platform": "android"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "update": {
+              "executor": "@nx/expo:update",
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "adb:devices": {
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "adb devices -l",
+                "cwd": "apps/android"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "adb:logcat": {
+              "executor": "nx:run-commands",
+              "defaultConfiguration": "filtered",
+              "options": {
+                "cwd": "apps/android"
+              },
+              "configurations": {
+                "filtered": {
+                  "command": "adb logcat *:S ReactNative:V ReactNativeJS:V"
+                },
+                "all": {
+                  "command": "adb logcat"
+                }
+              },
+              "parallelism": true
+            },
+            "adb:reverse": {
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "adb reverse tcp:8081 tcp:8081",
+                "cwd": "apps/android"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "adb:uninstall": {
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "adb uninstall com.signa.app",
+                "cwd": "apps/android"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "adb:screenshot": {
+              "executor": "nx:run-commands",
+              "options": {
+                "commands": [
+                  "adb shell screencap -p /sdcard/screenshot.png",
+                  "adb pull /sdcard/screenshot.png ./screenshot.png",
+                  "adb shell rm /sdcard/screenshot.png"
+                ],
+                "cwd": "apps/android",
+                "parallel": false
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "adb:clear-data": {
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "adb shell pm clear com.signa.app",
+                "cwd": "apps/android"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "options": {
+                "jestConfig": "apps/android/jest.config.ts"
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "@signa/android",
+          "tags": [
+            "npm:private",
+            "type:app",
+            "platform:mobile"
+          ],
+          "metadata": {
+            "targetGroups": {
+              "NPM Scripts": [
+                "android",
+                "ios"
+              ]
+            },
+            "js": {
+              "packageName": "@signa/android",
+              "packageVersion": "0.0.1",
+              "packageMain": "index.js",
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/android/src",
+          "projectType": "application",
+          "implicitDependencies": []
+        }
+      }
+    },
+    "dependencies": {
+      "@signa/runtime-fetch-client": [
+        {
+          "source": "@signa/runtime-fetch-client",
+          "target": "@signa/configs",
+          "type": "static"
+        },
+        {
+          "source": "@signa/runtime-fetch-client",
+          "target": "@signa/dsl-http-client",
+          "type": "static"
+        }
+      ],
+      "@signa/dsl-http-contract": [
+        {
+          "source": "@signa/dsl-http-contract",
+          "target": "@signa/configs",
+          "type": "static"
+        }
+      ],
+      "@signa/dsl-http-client": [
+        {
+          "source": "@signa/dsl-http-client",
+          "target": "@signa/configs",
+          "type": "static"
+        },
+        {
+          "source": "@signa/dsl-http-client",
+          "target": "@signa/dsl-http-contract",
+          "type": "static"
+        }
+      ],
+      "@signa/contracts-http": [
+        {
+          "source": "@signa/contracts-http",
+          "target": "@signa/configs",
+          "type": "static"
+        },
+        {
+          "source": "@signa/contracts-http",
+          "target": "@signa/dsl-http-contract",
+          "type": "static"
+        },
+        {
+          "source": "@signa/contracts-http",
+          "target": "@signa/shared",
+          "type": "static"
+        }
+      ],
+      "@signa/runtime-error": [
+        {
+          "source": "@signa/runtime-error",
+          "target": "@signa/configs",
+          "type": "static"
+        },
+        {
+          "source": "@signa/runtime-error",
+          "target": "@signa/dsl-error",
+          "type": "static"
+        }
+      ],
+      "@signa/dsl-error": [
+        {
+          "source": "@signa/dsl-error",
+          "target": "@signa/configs",
+          "type": "static"
+        }
+      ],
+      "@signa/configs": [],
+      "@signa/shared": [
+        {
+          "source": "@signa/shared",
+          "target": "@signa/configs",
+          "type": "static"
+        }
+      ],
+      "@signa/android": [
+        {
+          "source": "@signa/android",
+          "target": "@signa/configs",
+          "type": "static"
+        },
+        {
+          "source": "@signa/android",
+          "target": "@signa/shared",
+          "type": "static"
+        },
+        {
+          "source": "@signa/android",
+          "target": "@signa/contracts-http",
+          "type": "static"
+        },
+        {
+          "source": "@signa/android",
+          "target": "@signa/runtime-fetch-client",
+          "type": "static"
+        },
+        {
+          "source": "@signa/android",
+          "target": "@signa/runtime-error",
+          "type": "static"
+        }
+      ]
+    }
+  }
+}

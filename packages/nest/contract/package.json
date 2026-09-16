@@ -1,0 +1,28 @@
+{
+  "name": "@signa/nest-contract",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "@signa/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@signa/dsl-http-contract": "workspace:*",
+    "nestjs-zod": "catalog:",
+    "zod": "catalog:",
+    "tslib": "catalog:",
+    "reflect-metadata": "catalog:"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "catalog:",
+    "@nestjs/swagger": "catalog:",
+    "zod": "catalog:"
+  }
+}

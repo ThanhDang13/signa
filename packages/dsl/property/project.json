@@ -1,0 +1,31 @@
+{
+  "name": "@signa/dsl-property",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/dsl/property/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/dsl/property/dist",
+        "main": "packages/dsl/property/src/index.ts",
+        "tsConfig": "packages/dsl/property/tsconfig.lib.json",
+        "assets": ["packages/dsl/property/src/assets"],
+        "stripLeadingPaths": true
+      },
+      "configurations": {
+        "development": {
+          "sourceMap": true,
+          "optimization": false,
+          "swcrc": "packages/dsl/property/.swcrc"
+        },
+        "production": {
+          "sourceMap": false,
+          "optimization": true,
+          "swcrc": "packages/dsl/property/.prod.swcrc"
+        }
+      }
+    }
+  }
+}

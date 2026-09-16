@@ -1,0 +1,31 @@
+{
+  "name": "@signa/contracts-queue",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/contracts/queue/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/contracts/queue/dist",
+        "main": "packages/contracts/queue/src/index.ts",
+        "tsConfig": "packages/contracts/queue/tsconfig.lib.json",
+        "assets": ["packages/contracts/queue/src/assets"],
+        "stripLeadingPaths": true
+      },
+      "configurations": {
+        "development": {
+          "sourceMap": true,
+          "optimization": false,
+          "swcrc": "packages/contracts/queue/.swcrc"
+        },
+        "production": {
+          "sourceMap": false,
+          "optimization": true,
+          "swcrc": "packages/contracts/queue/.prod.swcrc"
+        }
+      }
+    }
+  }
+}

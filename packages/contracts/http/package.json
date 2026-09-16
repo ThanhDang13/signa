@@ -1,0 +1,42 @@
+{
+  "name": "@signa/contracts-http",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "@signa/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./identity": {
+      "@signa/source": "./src/identity/index.ts",
+      "types": "./dist/identity/index.d.ts",
+      "import": "./dist/identity/index.js",
+      "default": "./dist/identity/index.js"
+    },
+    "./election": {
+      "@signa/source": "./src/election/index.ts",
+      "types": "./dist/election/index.d.ts",
+      "import": "./dist/election/index.js",
+      "default": "./dist/election/index.js"
+    },
+    "./ballot": {
+      "@signa/source": "./src/ballot/index.ts",
+      "types": "./dist/ballot/index.d.ts",
+      "import": "./dist/ballot/index.js",
+      "default": "./dist/ballot/index.js"
+    }
+  },
+  "dependencies": {
+    "@signa/dsl-http-contract": "workspace:*",
+    "tslib": "catalog:",
+    "zod": "catalog:"
+  },
+  "peerDependencies": {
+    "zod": "catalog:"
+  }
+}

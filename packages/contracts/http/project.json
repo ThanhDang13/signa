@@ -1,0 +1,31 @@
+{
+  "name": "@signa/contracts-http",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/contracts/http/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/contracts/http/dist",
+        "main": "packages/contracts/http/src/index.ts",
+        "tsConfig": "packages/contracts/http/tsconfig.lib.json",
+        "assets": ["packages/contracts/http/src/assets"],
+        "stripLeadingPaths": true
+      },
+      "configurations": {
+        "development": {
+          "sourceMap": true,
+          "optimization": false,
+          "swcrc": "packages/contracts/http/.swcrc"
+        },
+        "production": {
+          "sourceMap": false,
+          "optimization": true,
+          "swcrc": "packages/contracts/http/.prod.swcrc"
+        }
+      }
+    }
+  }
+}

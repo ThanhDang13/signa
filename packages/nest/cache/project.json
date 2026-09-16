@@ -1,0 +1,31 @@
+{
+  "name": "@signa/nest-cache",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/nest/cache/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/nest/cache/dist",
+        "main": "packages/nest/cache/src/index.ts",
+        "tsConfig": "packages/nest/cache/tsconfig.lib.json",
+        "assets": ["packages/nest/cache/src/assets"],
+        "stripLeadingPaths": true
+      },
+      "configurations": {
+        "development": {
+          "sourceMap": true,
+          "optimization": false,
+          "swcrc": "packages/nest/cache/.swcrc"
+        },
+        "production": {
+          "sourceMap": false,
+          "optimization": true,
+          "swcrc": "packages/nest/cache/.prod.swcrc"
+        }
+      }
+    }
+  }
+}

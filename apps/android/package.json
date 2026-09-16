@@ -1,0 +1,60 @@
+{
+  "name": "@signa/android",
+  "version": "0.0.1",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "@nx/eslint-plugin": "*",
+    "@react-navigation/native": "^7.3.18",
+    "@rn-primitives/portal": "^1.5.3",
+    "@rn-primitives/slot": "^1.5.2",
+    "@signa/contracts-http": "workspace:*",
+    "@signa/dsl-http-client": "workspace:*",
+    "@signa/runtime-fetch-client": "workspace:*",
+    "@signa/shared": "workspace:*",
+    "@tanstack/react-query": "^5.62.11",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "expo": "~52.0.0",
+    "expo-constants": "~17.0.8",
+    "expo-linking": "~7.0.0",
+    "expo-router": "~4.0.0",
+    "expo-secure-store": "~14.0.1",
+    "expo-status-bar": "~2.0.0",
+    "jotai": "^2.10.3",
+    "jsonc-eslint-parser": "*",
+    "lucide-react-native": "^1.46.0",
+    "metro": "~0.81.5",
+    "nativewind": "^4.2.7",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-native": "0.76.9",
+    "react-native-reanimated": "~3.16.7",
+    "react-native-safe-area-context": "^4.12.0",
+    "react-native-screens": "~4.4.0",
+    "react-native-svg": "15.8.0",
+    "react-native-web": "~0.19.13",
+    "react-native-worklets-core": "^1.6.3",
+    "tailwind-merge": "^3.6.0",
+    "tailwindcss": "^3.4.19",
+    "tailwindcss-animate": "^1.0.7",
+    "tslib": "*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.0",
+    "@babel/runtime": "^7.25.0",
+    "@types/react": "~18.3.12",
+    "babel-preset-expo": "~12.0.0",
+    "typescript": "~5.7.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "18.3.1",
+      "react-dom": "18.3.1",
+      "@types/react": "~18.3.12",
+      "@types/react-dom": "~18.3.0",
+      "react-native-css-interop": "0.2.7"
+    }
+  }
+}

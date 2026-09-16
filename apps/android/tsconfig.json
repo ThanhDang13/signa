@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "files": [],
+  "include": ["nativewind-env.d.ts", ".expo/types/**/*.ts", "expo-env.d.ts"],
+  "compilerOptions": {
+    "ignoreDeprecations": "6.0",
+    "composite": true,
+    "paths": {
+      "@signa/android/*": ["./src/*"]
+    }
+  },
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    }
+  ]
+}

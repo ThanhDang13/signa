@@ -1,0 +1,31 @@
+{
+  "name": "@signa/runtime-error",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/runtime/error/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/runtime/error/dist",
+        "main": "packages/runtime/error/src/index.ts",
+        "tsConfig": "packages/runtime/error/tsconfig.lib.json",
+        "assets": [],
+        "stripLeadingPaths": true
+      },
+      "configurations": {
+        "development": {
+          "sourceMap": true,
+          "optimization": false,
+          "swcrc": "packages/runtime/error/.swcrc"
+        },
+        "production": {
+          "sourceMap": false,
+          "optimization": true,
+          "swcrc": "packages/runtime/error/.prod.swcrc"
+        }
+      }
+    }
+  }
+}

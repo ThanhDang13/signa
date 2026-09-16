@@ -1,0 +1,47 @@
+{
+  "name": "@signa/runtime-drizzle",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "@signa/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./schemas": {
+      "@signa/source": "./src/schemas/index.ts",
+      "types": "./dist/schemas/index.d.ts",
+      "import": "./dist/schemas/index.js",
+      "default": "./dist/schemas/index.js"
+    },
+    "./migrations": {
+      "@signa/source": "./src/migrations",
+      "default": "./dist/migrations"
+    },
+    "./migrations/index.js": {
+      "@signa/source": "./src/migrations/index.js",
+      "default": "./dist/migrations/index.js"
+    }
+  },
+  "dependencies": {
+    "@signa/dsl-error": "workspace:*",
+    "@signa/shared": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "postgres": "catalog:",
+    "tslib": "catalog:",
+    "zod": "catalog:",
+    "pg": "catalog:"
+  },
+  "devDependencies": {
+    "@types/pg": "catalog:"
+  },
+  "peerDependencies": {
+    "drizzle-kit": "catalog:",
+    "zod": "catalog:",
+    "pg": "catalog:"
+  }
+}

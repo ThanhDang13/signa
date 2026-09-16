@@ -1,0 +1,30 @@
+{
+  "name": "@signa/worker",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "@nestjs/common": "^10.4.15",
+    "@nestjs/core": "^10.4.15",
+    "@signa/contracts-queue": "workspace:*",
+    "@signa/nest-config": "workspace:*",
+    "@signa/nest-queue": "workspace:*",
+    "@signa/nest-s3": "workspace:*",
+    "@signa/runtime-error": "workspace:*",
+    "@signa/shared": "workspace:*",
+    "@techstark/opencv-js": "5.0.0-release.1",
+    "@types/pdfkit": "^0.17.6",
+    "@types/qrcode": "^1.5.6",
+    "aruco-marker": "^3.0.1",
+    "js-aruco2": "^2.0.0",
+    "jsqr": "^1.4.0",
+    "pdfkit": "^0.20.2",
+    "qrcode": "^1.5.4",
+    "reflect-metadata": "^0.2.0",
+    "rxjs": "^7.8.0",
+    "sharp": "^0.35.4",
+    "tslib": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.9"
+  }
+}

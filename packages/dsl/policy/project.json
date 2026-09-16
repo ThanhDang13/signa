@@ -1,0 +1,31 @@
+{
+  "name": "@signa/dsl-policy",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/dsl/policy/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/dsl/policy/dist",
+        "main": "packages/dsl/policy/src/index.ts",
+        "tsConfig": "packages/dsl/policy/tsconfig.lib.json",
+        "assets": ["packages/dsl/policy/src/assets"],
+        "stripLeadingPaths": true
+      },
+      "configurations": {
+        "development": {
+          "sourceMap": true,
+          "optimization": false,
+          "swcrc": "packages/dsl/policy/.swcrc"
+        },
+        "production": {
+          "sourceMap": false,
+          "optimization": true,
+          "swcrc": "packages/dsl/policy/.prod.swcrc"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "@signa/worker",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/worker/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:backend"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "apps/worker/dist",
+        "assets": ["apps/worker/src/assets"],
+        "main": "apps/worker/main.ts",
+        "tsConfig": "apps/worker/tsconfig.app.json",
+        "swcrc": "apps/worker/.swcrc",
+        "stripLeadingPaths": true
+      },
+      "configurations": {
+        "development": {
+          "sourceMap": true,
+          "optimization": false
+        },
+        "production": {
+          "sourceMap": false,
+          "optimization": true,
+          "swcrc": "apps/worker/.prod.swcrc"
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "options": {
+        "buildTarget": "@signa/worker:build",
+        "runBuildTargetDependencies": true,
+        "port": 9230
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "@signa/worker:build:development"
+        },
+        "production": {
+          "buildTarget": "@signa/worker:build:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "name": "@signa/android",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/android/src",
+  "projectType": "application",
+  "tags": ["type:app", "platform:mobile"],
+  "targets": {
+    "start": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "expo start --dev-client",
+        "cwd": "apps/android"
+      },
+      "dependsOn": ["sync-deps", "adb:reverse"]
+    },
+    "sync-deps": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "echo 'Dependencies synced'"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "dependencies"
+        }
+      ]
+    },
+    "prebuild": {
+      "executor": "@nx/expo:prebuild",
+      "options": {
+        "clean": false
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "defaultConfiguration": "debug",
+      "options": {
+        "cwd": "apps/android/android"
+      },
+      "configurations": {
+        "debug": {
+          "command": "CMAKE_VERSION=4.1.2 ./gradlew app:assembleDebug"
+        },
+        "release": {
+          "command": "CMAKE_VERSION=4.1.2 ./gradlew app:assembleRelease"
+        }
+      }
+    },
+    "install": {
+      "executor": "nx:run-commands",
+      "defaultConfiguration": "debug",
+      "options": {
+        "cwd": "apps/android"
+      },
+      "configurations": {
+        "debug": {
+          "command": "adb install -r android/app/build/outputs/apk/debug/app-debug.apk"
+        },
+        "release": {
+          "command": "adb install -r android/app/build/outputs/apk/release/app-release.apk"
+        }
+      },
+      "dependsOn": ["build"]
+    },
+    "adb:devices": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "adb devices -l",
+        "cwd": "apps/android"
+      }
+    },
+    "adb:logcat": {
+      "executor": "nx:run-commands",
+      "defaultConfiguration": "filtered",
+      "options": {
+        "cwd": "apps/android"
+      },
+      "configurations": {
+        "filtered": {
+          "command": "adb logcat *:S ReactNative:V ReactNativeJS:V"
+        },
+        "all": {
+          "command": "adb logcat"
+        }
+      }
+    },
+    "adb:reverse": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "adb reverse tcp:8081 tcp:8081",
+        "cwd": "apps/android"
+      }
+    },
+    "adb:uninstall": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "adb uninstall com.signa.app",
+        "cwd": "apps/android"
+      }
+    },
+    "adb:clear-data": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "adb shell pm clear com.signa.app",
+        "cwd": "apps/android"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "apps/android"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint .",
+        "cwd": "apps/android"
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "options": {
+        "jestConfig": "apps/android/jest.config.ts"
+      }
+    }
+  },
+  "implicitDependencies": []
+}

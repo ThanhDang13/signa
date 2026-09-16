@@ -1,0 +1,72 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "emitDeclarationOnly": false,
+    "outDir": "dist",
+    "declarationDir": "dist",
+    "types": ["node"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "incremental": true,
+    "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "paths": {
+      "@signa/api/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["eslint.config.js", "eslint.config.cjs", "eslint.config.mjs"],
+  "references": [
+    {
+      "path": "../../packages/dsl/queue-contract/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/shared/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/contracts/queue/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/nest/s3/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/nest/queue/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/nest/cache/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/runtime/error/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/runtime/drizzle/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/nest/property/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/nest/policy/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/nest/jwt/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/nest/error/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/nest/drizzle/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/nest/contract/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/nest/config/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/contracts/http/tsconfig.lib.json"
+    }
+  ]
+}

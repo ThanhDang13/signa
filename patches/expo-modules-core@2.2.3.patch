@@ -1,0 +1,22 @@
+diff --git a/android/CMakeLists.txt b/android/CMakeLists.txt
+index 65742646e6f93d273279a0c03736683198bee0b2..2872d2ed1b58d511127f00a8547b60c1373dc066 100644
+--- a/android/CMakeLists.txt
++++ b/android/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.4.1)
++cmake_minimum_required(VERSION 3.5)
+ 
+ project(expo-modules-core)
+ 
+diff --git a/android/build.gradle b/android/build.gradle
+index 05c45a62097ae7c60d92ed146e6d8875f62a7916..40ad6dff04f1c69524b921fcd4922a48dd4160d8 100644
+--- a/android/build.gradle
++++ b/android/build.gradle
+@@ -106,6 +106,7 @@ android {
+ 
+   externalNativeBuild {
+     cmake {
++      version "4.1.2"
+       path "CMakeLists.txt"
+     }
+   }

@@ -1,0 +1,31 @@
+{
+  "name": "@signa/nest-error",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/nest/error/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/nest/error/dist",
+        "main": "packages/nest/error/src/index.ts",
+        "tsConfig": "packages/nest/error/tsconfig.lib.json",
+        "assets": ["packages/nest/error/src/assets"],
+        "stripLeadingPaths": true
+      },
+      "configurations": {
+        "development": {
+          "sourceMap": true,
+          "optimization": false,
+          "swcrc": "packages/nest/error/.swcrc"
+        },
+        "production": {
+          "sourceMap": false,
+          "optimization": true,
+          "swcrc": "packages/nest/error/.prod.swcrc"
+        }
+      }
+    }
+  }
+}

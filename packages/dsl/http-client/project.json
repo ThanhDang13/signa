@@ -1,0 +1,31 @@
+{
+  "name": "@signa/dsl-http-client",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/dsl/http-client/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/dsl/http-client/dist",
+        "main": "packages/dsl/http-client/src/index.ts",
+        "tsConfig": "packages/dsl/http-client/tsconfig.lib.json",
+        "assets": ["packages/dsl/http-client/src/assets"],
+        "stripLeadingPaths": true
+      },
+      "configurations": {
+        "development": {
+          "sourceMap": true,
+          "optimization": false,
+          "swcrc": "packages/dsl/http-client/.swcrc"
+        },
+        "production": {
+          "sourceMap": false,
+          "optimization": true,
+          "swcrc": "packages/dsl/http-client/.prod.swcrc"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "compilerOptions": {
+    "ignoreDeprecations": "6.0",
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "importHelpers": true,
+    "isolatedModules": true,
+    "lib": ["es2022"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": false, //set to true on prod
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es2022",
+    "customConditions": ["@signa/source"],
+    "paths": {
+      "@signa/shared": ["./packages/shared/src/index.ts"],
+
+      "@signa/contracts-http": ["./packages/contracts/http/src/index.ts"],
+      "@signa/contracts-http/*": ["./packages/contracts/http/src/*"],
+      "@signa/contracts-queue": ["./packages/contracts/queue/src/index.ts"],
+      "@signa/contracts-queue/ballot": ["./packages/contracts/queue/src/ballot/index.ts"],
+      "@signa/contracts-queue/scanning": ["./packages/contracts/queue/src/scanning/index.ts"],
+
+      "@signa/dsl-config": ["./packages/dsl/config/src/index.ts"],
+      "@signa/dsl-error": ["./packages/dsl/error/src/index.ts"],
+      "@signa/dsl-http-client": ["./packages/dsl/http-client/src/index.ts"],
+      "@signa/dsl-http-contract": ["./packages/dsl/http-contract/src/index.ts"],
+      "@signa/dsl-policy": ["./packages/dsl/policy/src/index.ts"],
+      "@signa/dsl-property": ["./packages/dsl/property/src/index.ts"],
+      "@signa/dsl-queue-contract": ["./packages/dsl/queue-contract/src/index.ts"],
+
+      "@signa/nest-cache": ["./packages/nest/cache/src/index.ts"],
+      "@signa/nest-config": ["./packages/nest/config/src/index.ts"],
+      "@signa/nest-contract": ["./packages/nest/contract/src/index.ts"],
+      "@signa/nest-drizzle": ["./packages/nest/drizzle/src/index.ts"],
+      "@signa/nest-error": ["./packages/nest/error/src/index.ts"],
+      "@signa/nest-jwt": ["./packages/nest/jwt/src/index.ts"],
+      "@signa/nest-policy": ["./packages/nest/policy/src/index.ts"],
+      "@signa/nest-property": ["./packages/nest/property/src/index.ts"],
+      "@signa/nest-queue": ["./packages/nest/queue/src/index.ts"],
+      "@signa/nest-s3": ["./packages/nest/s3/src/index.ts"],
+
+      "@signa/react-ui/*": ["./packages/react/ui/src/*"],
+
+      "@signa/runtime-drizzle": ["./packages/runtime/drizzle/src/index.ts"],
+      "@signa/runtime-drizzle/schemas": ["./packages/runtime/drizzle/src/schemas/index.ts"],
+      "@signa/runtime-error": ["./packages/runtime/error/src/index.ts"],
+      "@signa/runtime-fetch-client": ["./packages/runtime/fetch-client/src/index.ts"],
+      "@signa/runtime-policy": ["./packages/runtime/policy/src/index.ts"],
+
+      "@signa/api/*": ["./apps/api/src/*"],
+
+      "@signa/web/*": ["./apps/web/src/*"],
+
+      "@signa/android/*": ["./apps/android/src/*"]
+    }
+  }
+}

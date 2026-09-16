@@ -1,0 +1,31 @@
+{
+  "name": "@signa/dsl-http-contract",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/dsl/http-contract/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/dsl/http-contract/dist",
+        "main": "packages/dsl/http-contract/src/index.ts",
+        "tsConfig": "packages/dsl/http-contract/tsconfig.lib.json",
+        "assets": ["packages/dsl/http-contract/src/assets"],
+        "stripLeadingPaths": true
+      },
+      "configurations": {
+        "development": {
+          "sourceMap": true,
+          "optimization": false,
+          "swcrc": "packages/dsl/http-contract/.swcrc"
+        },
+        "production": {
+          "sourceMap": false,
+          "optimization": true,
+          "swcrc": "packages/dsl/http-contract/.prod.swcrc"
+        }
+      }
+    }
+  }
+}

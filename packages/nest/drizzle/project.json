@@ -1,0 +1,31 @@
+{
+  "name": "@signa/nest-drizzle",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/nest/drizzle/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/nest/drizzle/dist",
+        "main": "packages/nest/drizzle/src/index.ts",
+        "tsConfig": "packages/nest/drizzle/tsconfig.lib.json",
+        "assets": ["packages/nest/drizzle/src/assets"],
+        "stripLeadingPaths": true
+      },
+      "configurations": {
+        "development": {
+          "sourceMap": true,
+          "optimization": false,
+          "swcrc": "packages/nest/drizzle/.swcrc"
+        },
+        "production": {
+          "sourceMap": false,
+          "optimization": true,
+          "swcrc": "packages/nest/drizzle/.prod.swcrc"
+        }
+      }
+    }
+  }
+}

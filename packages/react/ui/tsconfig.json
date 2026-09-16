@@ -1,0 +1,17 @@
+{
+  "files": [],
+  "include": [],
+  "compilerOptions": {
+    "paths": {
+      "@signa/react-ui/*": ["./src/*"]
+    },
+    "noEmit": false,
+    "emitDeclarationOnly": true
+  },
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    }
+  ],
+  "extends": "../../../tsconfig.base.json"
+}

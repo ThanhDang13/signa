@@ -1,0 +1,31 @@
+{
+  "name": "@signa/runtime-fetch-client",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/runtime/fetch-client/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/runtime/fetch-client/dist",
+        "main": "packages/runtime/fetch-client/src/index.ts",
+        "tsConfig": "packages/runtime/fetch-client/tsconfig.lib.json",
+        "assets": [],
+        "stripLeadingPaths": true
+      },
+      "configurations": {
+        "development": {
+          "sourceMap": true,
+          "optimization": false,
+          "swcrc": "packages/runtime/fetch-client/.swcrc"
+        },
+        "production": {
+          "sourceMap": false,
+          "optimization": true,
+          "swcrc": "packages/runtime/fetch-client/.prod.swcrc"
+        }
+      }
+    }
+  }
+}

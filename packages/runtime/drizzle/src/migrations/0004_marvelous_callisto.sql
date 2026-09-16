@@ -1,0 +1,1 @@
+ALTER TABLE "ballot_generation_outbox" DROP COLUMN "ballot_id";

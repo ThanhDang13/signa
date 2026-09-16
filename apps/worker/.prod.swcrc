@@ -1,0 +1,29 @@
+{
+  "$schema": "https://swc.rs/schema.json",
+  "exclude": ["node_modules"],
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "decorators": true,
+      "dynamicImport": true
+    },
+    "baseUrl": "./src",
+    "paths": {
+      "@signa/worker/*": ["./*"]
+    },
+    "transform": {
+      "legacyDecorator": true,
+      "decoratorMetadata": true
+    },
+    "target": "es2022",
+    "keepClassNames": true,
+    "minify": {
+      "compress": true,
+      "mangle": true
+    }
+  },
+  "module": {
+    "type": "commonjs"
+  },
+  "sourceMaps": false
+}

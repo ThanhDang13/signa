@@ -1,0 +1,31 @@
+{
+  "name": "@signa/nest-s3",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/nest/s3/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/nest/s3/dist",
+        "main": "packages/nest/s3/src/index.ts",
+        "tsConfig": "packages/nest/s3/tsconfig.lib.json",
+        "assets": ["packages/nest/s3/src/assets"],
+        "stripLeadingPaths": true
+      },
+      "configurations": {
+        "development": {
+          "sourceMap": true,
+          "optimization": false,
+          "swcrc": "packages/nest/s3/.swcrc"
+        },
+        "production": {
+          "sourceMap": false,
+          "optimization": true,
+          "swcrc": "packages/nest/s3/.prod.swcrc"
+        }
+      }
+    }
+  }
+}

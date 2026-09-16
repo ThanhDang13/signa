@@ -1,0 +1,31 @@
+{
+  "name": "@signa/dsl-error",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/dsl/error/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/dsl/error/dist",
+        "main": "packages/dsl/error/src/index.ts",
+        "tsConfig": "packages/dsl/error/tsconfig.lib.json",
+        "assets": ["packages/dsl/error/src/assets"],
+        "stripLeadingPaths": true
+      },
+      "configurations": {
+        "development": {
+          "sourceMap": true,
+          "optimization": false,
+          "swcrc": "packages/dsl/error/.swcrc"
+        },
+        "production": {
+          "sourceMap": false,
+          "optimization": true,
+          "swcrc": "packages/dsl/error/.prod.swcrc"
+        }
+      }
+    }
+  }
+}

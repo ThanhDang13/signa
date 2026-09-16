@@ -1,0 +1,1 @@
+ALTER TABLE "ballot_generation_outbox" ADD COLUMN "ballot_ids" text NOT NULL;

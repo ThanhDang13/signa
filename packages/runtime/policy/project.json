@@ -1,0 +1,41 @@
+{
+  "name": "@signa/runtime-policy",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "packages/runtime/policy/src",
+  "prefix": "signa",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/runtime/policy/dist",
+        "main": "packages/runtime/policy/src/index.ts",
+        "tsConfig": "packages/runtime/policy/tsconfig.lib.json",
+        "assets": ["packages/runtime/policy/*.md"],
+        "swcrc": "packages/runtime/policy/.swcrc",
+        "stripLeadingPaths": true
+      },
+      "configurations": {
+        "development": {
+          "sourceMap": true,
+          "optimization": false,
+          "swcrc": "packages/runtime/policy/.swcrc"
+        },
+        "production": {
+          "sourceMap": false,
+          "optimization": true,
+          "swcrc": "packages/runtime/policy/.prod.swcrc"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/runtime/policy/**/*.ts"]
+      }
+    }
+  },
+  "tags": []
+}

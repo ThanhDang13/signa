@@ -1,0 +1,26 @@
+{
+  "name": "@signa/nest-policy",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "@signa/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@signa/dsl-policy": "workspace:*",
+    "@signa/runtime-policy": "workspace:*",
+    "@signa/dsl-error": "workspace:*",
+    "tslib": "catalog:"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "catalog:",
+    "@nestjs/core": "catalog:"
+  }
+}

@@ -1,0 +1,12 @@
+diff --git a/android/build.gradle b/android/build.gradle
+index 909ba779cd34002fd879803dfba184fce45d7de2..09e30f65bb3df97ed647883305c25eff0249d12c 100644
+--- a/android/build.gradle
++++ b/android/build.gradle
+@@ -137,6 +137,7 @@ android {
+     }
+     externalNativeBuild {
+         cmake {
++            version "4.1.2"
+             path "CMakeLists.txt"
+         }
+     }
