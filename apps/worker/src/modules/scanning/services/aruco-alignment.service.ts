@@ -42,50 +42,73 @@ export class ArucoAlignmentService {
     layout: BallotLayout
   ): Promise<AlignmentResult> {
     try {
-      // Create ImageData-like object for ArUco detector
-      const imageData = {
+      // Validate buffer
+      if (rgbaBuffer.length !== width * height * 4) {
+        this.logger.error(`Buffer size mismatch!`);
+        return { alignedImage: null, markersDetected: false };
+      }
+
+      // Step 1: Try detection on original size first
+      let markers = this.arucoDetector.detect({
         width,
         height,
         data: new Uint8ClampedArray(rgbaBuffer)
-      };
+      });
+      this.logger.debug(`Original size detection: found ${markers.length} markers`);
 
-      this.logger.debug(
-        `ArUco detection: image ${width}x${height}, buffer length ${rgbaBuffer.length}, expected ${width * height * 4}`
-      );
+      let detectionWidth = width;
+      let detectionHeight = height;
 
-      // Validate ImageData format
-      if (rgbaBuffer.length !== width * height * 4) {
-        this.logger.error(`Buffer size mismatch! Cannot perform detection.`);
-        return { alignedImage: null, markersDetected: false };
+      // Step 2: If not enough markers, try downscaled image
+      if (markers.length < 4) {
+        const targetWidth = 800;
+        const targetHeight = Math.round(height * (targetWidth / width));
+
+        const { data: scaledData, info } = await sharp(rgbaBuffer, {
+          raw: { width, height, channels: 4 }
+        })
+          .resize(targetWidth, targetHeight)
+          .normalise()
+          .raw()
+          .toBuffer({ resolveWithObject: true });
+
+        markers = this.arucoDetector.detect({
+          width: info.width,
+          height: info.height,
+          data: new Uint8ClampedArray(scaledData)
+        });
+
+        detectionWidth = info.width;
+        detectionHeight = info.height;
+        this.logger.debug(
+          `Downscaled detection (${info.width}x${info.height}): found ${markers.length} markers`
+        );
       }
 
-      // Detect ArUco markers using js-aruco2
-      this.logger.debug("Starting ArUco marker detection...");
-      const markers = this.arucoDetector.detect(imageData);
-      this.logger.debug(`ArUco detection complete: found ${markers.length} markers`);
-
-      if (markers.length > 0) {
-        this.logger.debug(`Marker IDs found: ${markers.map(m => m.id).join(", ")}`);
-      }
+      this.logger.debug(`Marker IDs found: ${markers.map((m) => m.id).join(", ")}`);
 
       if (markers.length < 4) {
-        this.logger.warn(`Only detected ${markers.length} ArUco markers, need 4 for alignment`);
+        this.logger.warn(`Only detected ${markers.length} ArUco markers, need 4`);
         return { alignedImage: null, markersDetected: false };
       }
 
-      this.logger.debug(`Detected ${markers.length} ArUco markers`);
+      // Step 3: Scale marker coordinates back to original image size
+      const scaleX = width / detectionWidth;
+      const scaleY = height / detectionHeight;
 
-      // Map markers by ID - expecting IDs 0, 1, 2, 3 at the four corners
-      // 0: top-left, 1: top-right, 2: bottom-right, 3: bottom-left
-      const markerMap = this.buildMarkerMap(markers);
+      const scaledMarkers = markers.map((m) => ({
+        ...m,
+        corners: m.corners.map((c) => ({ x: c.x * scaleX, y: c.y * scaleY }))
+      }));
 
-      // Validate we have all 4 required markers
+      const markerMap = this.buildMarkerMap(scaledMarkers);
+
       if (!this.hasAllRequiredMarkers(markerMap)) {
-        this.logger.warn("Missing required marker IDs (0, 1, 2, 3), skipping alignment");
+        this.logger.warn("Missing required marker IDs (0, 1, 2, 3)");
         return { alignedImage: null, markersDetected: false };
       }
 
-      // Apply perspective transformation
+      // Step 4: Apply perspective correction on full resolution original
       const alignedImage = this.applyPerspectiveCorrection(
         rgbaBuffer,
         width,
@@ -94,8 +117,9 @@ export class ArucoAlignmentService {
         layout
       );
 
-      this.logger.log(`Perspective correction applied: ${alignedImage.cols}x${alignedImage.rows}px`);
-
+      this.logger.log(
+        `Perspective correction applied: ${alignedImage.cols}x${alignedImage.rows}px`
+      );
       return { alignedImage, markersDetected: true };
     } catch (error) {
       this.logger.error("ArUco detection failed:", error);
@@ -112,8 +136,10 @@ export class ArucoAlignmentService {
     for (const marker of markers) {
       if (marker.id >= 0 && marker.id <= 3) {
         // Calculate center of marker from corners
-        const centerX = marker.corners.reduce((sum: number, c) => sum + c.x, 0) / marker.corners.length;
-        const centerY = marker.corners.reduce((sum: number, c) => sum + c.y, 0) / marker.corners.length;
+        const centerX =
+          marker.corners.reduce((sum: number, c) => sum + c.x, 0) / marker.corners.length;
+        const centerY =
+          marker.corners.reduce((sum: number, c) => sum + c.y, 0) / marker.corners.length;
 
         markerMap.set(marker.id, { x: centerX, y: centerY });
         this.logger.debug(`Marker ${marker.id} at (${centerX.toFixed(1)}, ${centerY.toFixed(1)})`);

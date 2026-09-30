@@ -2,7 +2,7 @@
   "name": "@signa/configs",
   "version": "0.0.1",
   "private": true,
-  "type": "module",
+  "files": ["dist"],
   "exports": {
     "./eslint": "./eslint.config.mjs",
     "./eslint-nest": "./nest-eslint.config.mjs",

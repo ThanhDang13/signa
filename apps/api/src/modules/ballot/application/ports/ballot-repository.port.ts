@@ -8,5 +8,6 @@ export interface BallotRepository {
   findByElectionId(electionId: string): Promise<Ballot[]>;
   findByStatus(status: string): Promise<Ballot[]>;
   save(ballot: Ballot): Promise<void>;
+  update(ballot: Ballot): Promise<void>;
   delete(id: string): Promise<void>;
 }

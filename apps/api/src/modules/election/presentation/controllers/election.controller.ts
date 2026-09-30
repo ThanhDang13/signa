@@ -1,13 +1,15 @@
-import { Body, Controller, HttpCode, HttpStatus, Param } from "@nestjs/common";
+import { Body, Controller, HttpCode, HttpStatus, Param, Query } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
-import { CommandBus } from "@nestjs/cqrs";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ContractRoute, Response } from "@signa/nest-contract";
 import {
   createElectionContract,
   updateElectionContract,
   activateElectionContract,
   closeElectionContract,
-  deleteElectionContract
+  deleteElectionContract,
+  getElectionContract,
+  listElectionsContract
 } from "@signa/contracts-http/election";
 import {
   CreateElectionCommand,
@@ -37,8 +39,20 @@ import {
   DeleteElectionParamsDto,
   DeleteElectionOutputDto
 } from "@signa/api/modules/election/presentation/dto/delete-election.dto";
+import {
+  GetElectionParamsDto,
+  GetElectionOutputDto
+} from "@signa/api/modules/election/presentation/dto/get-election.dto";
+import {
+  ListElectionsQueryDto,
+  ListElectionsOutputDto
+} from "@signa/api/modules/election/presentation/dto/list-elections.dto";
 import { Protected } from "@signa/api/core/security/decorator";
 import { CurrentUser, type JwtPayload } from "@signa/nest-jwt";
+import {
+  GetElectionByIdQuery,
+  ListElectionsQuery
+} from "@signa/api/modules/election/application/queries";
 
 const CreateElectionRoute = ContractRoute(createElectionContract, {
   summary: "Create a new election"
@@ -60,10 +74,21 @@ const DeleteElectionRoute = ContractRoute(deleteElectionContract, {
   summary: "Delete an election"
 });
 
+const GetElectionRoute = ContractRoute(getElectionContract, {
+  summary: "Get an election by ID"
+});
+
+const ListElectionsRoute = ContractRoute(listElectionsContract, {
+  summary: "List elections with pagination and filters"
+});
+
 @ApiTags("ELECTIONS")
 @Controller()
 export class ElectionController {
-  constructor(private readonly commandBus: CommandBus) {}
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus
+  ) {}
 
   @CreateElectionRoute
   @Protected()
@@ -127,5 +152,30 @@ export class ElectionController {
   @HttpCode(HttpStatus.OK)
   async delete(@Param() params: DeleteElectionParamsDto, @CurrentUser() user: JwtPayload) {
     return this.commandBus.execute(new DeleteElectionCommand({ id: params.id }));
+  }
+
+  @GetElectionRoute
+  @Protected()
+  @Response({ type: GetElectionOutputDto })
+  @HttpCode(HttpStatus.OK)
+  async getById(@Param() params: GetElectionParamsDto, @CurrentUser() user: JwtPayload) {
+    return this.queryBus.execute(new GetElectionByIdQuery({ id: params.id }));
+  }
+
+  @ListElectionsRoute
+  @Protected()
+  @Response({ type: ListElectionsOutputDto })
+  @HttpCode(HttpStatus.OK)
+  async list(@Query() query: ListElectionsQueryDto, @CurrentUser() user: JwtPayload) {
+    return this.queryBus.execute(
+      new ListElectionsQuery({
+        pageIndex: query.pageIndex,
+        pageSize: query.pageSize,
+        sortBy: query.sortBy,
+        order: query.order,
+        status: query.status,
+        createdById: query.createdById
+      })
+    );
   }
 }

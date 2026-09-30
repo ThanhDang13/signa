@@ -5,8 +5,8 @@ export const createElectionSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
   formStructure: formStructureSchema,
-  startDate: z.string().datetime().optional(),
-  endDate: z.string().datetime().optional(),
+  startDate: z.iso.datetime().optional(),
+  endDate: z.iso.datetime().optional(),
   maxVoters: z.number().int().positive().optional()
 });
 

@@ -12,7 +12,8 @@
         "main": "packages/shared/src/index.ts",
         "tsConfig": "packages/shared/tsconfig.lib.json",
         "assets": ["packages/shared/src/assets"],
-        "stripLeadingPaths": true
+        "stripLeadingPaths": true,
+        "generatePackageJson": false
       },
       "configurations": {
         "development": {

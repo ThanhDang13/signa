@@ -10,7 +10,12 @@ import {
   type OmrProcessingOutboxRepository
 } from "@signa/api/modules/ballot/application/ports";
 import { OmrProcessingRequest } from "@signa/api/modules/ballot/domain/entities";
-import { createBallotNotFoundError } from "@signa/api/modules/ballot/application/errors";
+import {
+  createBallotNotFoundError,
+  createBallotAlreadyVotedError,
+  createScanAlreadyActiveError,
+  createScanAlreadyTerminalError
+} from "@signa/api/modules/ballot/application/errors";
 
 @CommandHandler(ProcessBallotScanCommand)
 export class ProcessBallotScanHandler implements ICommandHandler<ProcessBallotScanCommand> {
@@ -21,21 +26,42 @@ export class ProcessBallotScanHandler implements ICommandHandler<ProcessBallotSc
   ) {}
 
   async execute(command: ProcessBallotScanCommand) {
-    const { ballotId, s3Key } = command.payload;
+    const { ballotId, s3Key, userId } = command.payload;
 
-    // Verify ballot exists
+    // 1. Verify ballot exists
     const ballot = await this.ballots.findById(ballotId);
     if (!ballot) {
       throw createBallotNotFoundError();
     }
 
-    // Create OMR processing request
+    // 2. Reject if ballot already voted
+    if (ballot.isVoted()) {
+      throw createBallotAlreadyVotedError();
+    }
+
+    // 3. Check for existing scan request by ballot ID (global duplicate check)
+    const existingRequest = await this.outboxRepo.findByBallotId(ballotId);
+
+    if (existingRequest) {
+      // 3a. Reject if request is active
+      if (existingRequest.isActive()) {
+        throw createScanAlreadyActiveError();
+      }
+
+      // 3b. If terminal, instruct client to retry the existing request
+      if (existingRequest.isTerminal()) {
+        throw createScanAlreadyTerminalError(existingRequest.id);
+      }
+    }
+
+    // 4. Create new OMR processing request
     const request = OmrProcessingRequest.create({
       ballotId,
+      userId,
       s3Key
     });
 
-    // Save to outbox (scheduler will pick it up)
+    // 5. Save to outbox (scheduler will pick it up)
     await this.outboxRepo.save(request);
 
     return {

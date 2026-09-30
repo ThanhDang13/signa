@@ -12,7 +12,8 @@
         "main": "packages/runtime/fetch-client/src/index.ts",
         "tsConfig": "packages/runtime/fetch-client/tsconfig.lib.json",
         "assets": [],
-        "stripLeadingPaths": true
+        "stripLeadingPaths": true,
+        "generatePackageJson": false
       },
       "configurations": {
         "development": {

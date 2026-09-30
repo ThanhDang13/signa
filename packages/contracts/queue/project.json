@@ -12,7 +12,8 @@
         "main": "packages/contracts/queue/src/index.ts",
         "tsConfig": "packages/contracts/queue/tsconfig.lib.json",
         "assets": ["packages/contracts/queue/src/assets"],
-        "stripLeadingPaths": true
+        "stripLeadingPaths": true,
+        "generatePackageJson": false
       },
       "configurations": {
         "development": {

@@ -12,7 +12,8 @@
         "main": "packages/dsl/http-contract/src/index.ts",
         "tsConfig": "packages/dsl/http-contract/tsconfig.lib.json",
         "assets": ["packages/dsl/http-contract/src/assets"],
-        "stripLeadingPaths": true
+        "stripLeadingPaths": true,
+        "generatePackageJson": false
       },
       "configurations": {
         "development": {

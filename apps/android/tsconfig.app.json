@@ -2,7 +2,6 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
-    "ignoreDeprecations": "6.0",
     "allowJs": true,
     "esModuleInterop": true,
     "jsx": "react-native",
@@ -21,7 +20,9 @@
     "forceConsistentCasingInFileNames": true,
     "paths": {
       "@signa/android/*": ["./src/*"]
-    }
+    },
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo"
   },
   "references": [
     {

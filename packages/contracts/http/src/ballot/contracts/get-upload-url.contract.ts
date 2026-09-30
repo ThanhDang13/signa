@@ -8,7 +8,7 @@ import {
 export const getUploadUrlContract = defineContract({
   method: "POST",
   path: "/v1/ballots/:ballotId/upload-url",
-  pathParams: getUploadUrlParamsSchema,
+  params: getUploadUrlParamsSchema,
   body: getUploadUrlSchema,
   response: getUploadUrlResponseSchema
 });

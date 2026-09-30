@@ -124,6 +124,7 @@ export const s3ConfigFactory = defineConfig({
         secretAccessKey: getEnv("AWS_SECRET_ACCESS_KEY")
       },
       endpoint: getEnvOptional("S3_ENDPOINT"),
+      publicEndpoint: getEnvOptional("S3_PUBLIC_ENDPOINT"),
       forcePathStyle: getEnvOptional("S3_FORCE_PATH_STYLE") === "true"
     };
   }

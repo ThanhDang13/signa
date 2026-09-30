@@ -11,19 +11,7 @@
         "command": "expo start --dev-client",
         "cwd": "apps/android"
       },
-      "dependsOn": ["sync-deps", "adb:reverse"]
-    },
-    "sync-deps": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "echo 'Dependencies synced'"
-      },
-      "dependsOn": [
-        {
-          "target": "build",
-          "projects": "dependencies"
-        }
-      ]
+      "dependsOn": ["^build", "adb:reverse"]
     },
     "prebuild": {
       "executor": "@nx/expo:prebuild",
@@ -87,7 +75,7 @@
     "adb:reverse": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "adb reverse tcp:8081 tcp:8081",
+        "command": "adb reverse tcp:8082 tcp:8081",
         "cwd": "apps/android"
       }
     },

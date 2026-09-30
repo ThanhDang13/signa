@@ -12,7 +12,8 @@
         "main": "packages/nest/policy/src/index.ts",
         "tsConfig": "packages/nest/policy/tsconfig.lib.json",
         "assets": ["packages/nest/policy/src/assets"],
-        "stripLeadingPaths": true
+        "stripLeadingPaths": true,
+        "generatePackageJson": false
       },
       "configurations": {
         "development": {

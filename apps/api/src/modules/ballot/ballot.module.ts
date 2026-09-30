@@ -5,18 +5,23 @@ import { BallotController } from "@signa/api/modules/ballot/presentation/control
 import { DrizzleBallotRepository } from "@signa/api/modules/ballot/infrastructure/persistence/drizzle-ballot.repository";
 import { DrizzleBallotGenerationOutboxRepository } from "@signa/api/modules/ballot/infrastructure/persistence/drizzle-ballot-generation-outbox.repository";
 import { DrizzleOmrProcessingOutboxRepository } from "@signa/api/modules/ballot/infrastructure/persistence/drizzle-omr-processing-outbox.repository";
+import { DrizzleBallotScanResultRepository } from "@signa/api/modules/ballot/infrastructure/persistence/drizzle-ballot-scan-result.repository";
 import { BallotGenerationOutboxScheduler } from "@signa/api/modules/ballot/application/schedulers/outbox.scheduler";
 import { OmrProcessingOutboxScheduler } from "@signa/api/modules/ballot/application/schedulers/omr-processing-outbox.scheduler";
+import { BallotResultValidator } from "@signa/api/modules/ballot/application/services/ballot-result-validator";
 import {
   BALLOT_REPOSITORY,
   BALLOT_GENERATION_OUTBOX_REPOSITORY,
-  OMR_PROCESSING_OUTBOX_REPOSITORY
+  OMR_PROCESSING_OUTBOX_REPOSITORY,
+  BALLOT_SCAN_RESULT_REPOSITORY
 } from "@signa/api/modules/ballot/application/ports";
 import * as CommandHandlers from "@signa/api/modules/ballot/application/commands/handlers";
+import * as QueryHandlers from "@signa/api/modules/ballot/application/queries/handlers";
 import { ElectionModule } from "@signa/api/modules/election/election.module";
 import { createQueuePublisher } from "@signa/nest-queue";
 
 const commandHandlers = Object.values(CommandHandlers);
+const queryHandlers = Object.values(QueryHandlers);
 
 @Module({
   imports: [
@@ -28,6 +33,7 @@ const commandHandlers = Object.values(CommandHandlers);
   controllers: [BallotController],
   providers: [
     ...commandHandlers,
+    ...queryHandlers,
     { provide: BALLOT_REPOSITORY, useClass: DrizzleBallotRepository },
     {
       provide: BALLOT_GENERATION_OUTBOX_REPOSITORY,
@@ -37,13 +43,16 @@ const commandHandlers = Object.values(CommandHandlers);
       provide: OMR_PROCESSING_OUTBOX_REPOSITORY,
       useClass: DrizzleOmrProcessingOutboxRepository
     },
+    {
+      provide: BALLOT_SCAN_RESULT_REPOSITORY,
+      useClass: DrizzleBallotScanResultRepository
+    },
     createQueuePublisher(["ballot-generation", "scan"]),
     BallotGenerationOutboxScheduler,
-    OmrProcessingOutboxScheduler
+    OmrProcessingOutboxScheduler,
+    BallotResultValidator
   ],
   exports: [BALLOT_REPOSITORY]
 })
 export class BallotModule {}
-
-
 

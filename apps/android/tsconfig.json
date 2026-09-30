@@ -3,7 +3,8 @@
   "files": [],
   "include": ["nativewind-env.d.ts", ".expo/types/**/*.ts", "expo-env.d.ts"],
   "compilerOptions": {
-    "ignoreDeprecations": "6.0",
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
     "composite": true,
     "paths": {
       "@signa/android/*": ["./src/*"]

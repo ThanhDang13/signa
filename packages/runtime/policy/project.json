@@ -14,7 +14,8 @@
         "tsConfig": "packages/runtime/policy/tsconfig.lib.json",
         "assets": ["packages/runtime/policy/*.md"],
         "swcrc": "packages/runtime/policy/.swcrc",
-        "stripLeadingPaths": true
+        "stripLeadingPaths": true,
+        "generatePackageJson": false
       },
       "configurations": {
         "development": {

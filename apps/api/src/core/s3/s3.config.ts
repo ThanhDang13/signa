@@ -17,6 +17,7 @@ export class S3ConfigService implements NestS3OptionsFactory {
         region: this.config.region,
         credentials: this.config.credentials,
         endpoint: this.config.endpoint,
+        publicEndpoint: this.config.publicEndpoint,
         forcePathStyle: this.config.forcePathStyle
       })
     };

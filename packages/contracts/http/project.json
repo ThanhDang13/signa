@@ -14,6 +14,7 @@
         "assets": ["packages/contracts/http/src/assets"],
         "stripLeadingPaths": true
       },
+
       "configurations": {
         "development": {
           "sourceMap": true,

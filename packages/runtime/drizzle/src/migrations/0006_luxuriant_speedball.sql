@@ -1,0 +1,1 @@
+ALTER TABLE "ballot_scan_results" ADD COLUMN "s3_url" text NOT NULL;

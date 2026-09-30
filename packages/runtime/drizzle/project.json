@@ -19,7 +19,8 @@
             "output": "migrations"
           }
         ],
-        "stripLeadingPaths": true
+        "stripLeadingPaths": true,
+        "generatePackageJson": false
       },
       "configurations": {
         "development": {

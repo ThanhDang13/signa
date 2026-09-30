@@ -24,16 +24,13 @@ export class QrCodeGenerationService {
     // Compress the data using deflate to reduce QR version
     const compressed = deflateSync(Buffer.from(qrData, "utf-8"));
 
-    // Use byte mode segment for raw binary data (avoid base64 overhead)
-    const segments: QRCode.QRCodeSegment[] = [
-      {
-        data: compressed,
-        mode: "byte"
-      }
-    ];
+    // Encode compressed data as base64 for mobile compatibility
+    // Mobile QR scanners struggle with raw binary byte mode
+    // Base64 encoding adds ~33% overhead but ensures compatibility
+    const base64Compressed = compressed.toString("base64");
 
     // Generate high-resolution QR code for print quality
-    return QRCode.toDataURL(segments, {
+    return QRCode.toDataURL(base64Compressed, {
       errorCorrectionLevel: "M", // Medium error correction (balanced size vs recovery)
       width: 600, // High resolution for crisp printing and scanning
       margin: 2   // Adequate quiet zone around QR code

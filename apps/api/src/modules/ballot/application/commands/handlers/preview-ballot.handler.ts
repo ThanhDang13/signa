@@ -8,6 +8,7 @@ import { v7 as uuidv7 } from "uuid";
 import { createHmac } from "crypto";
 import { InjectConfig } from "@signa/nest-config";
 import { APP_CONFIG, type AppConfig } from "@signa/api/core/config/tokens";
+import { BallotId } from "@signa/api/modules/ballot/domain/value-objects";
 
 @CommandHandler(PreviewBallotCommand)
 export class PreviewBallotHandler implements ICommandHandler<PreviewBallotCommand> {
@@ -23,7 +24,7 @@ export class PreviewBallotHandler implements ICommandHandler<PreviewBallotComman
     const { electionId, formStructure } = command.payload;
 
     // Generate a sample ballot ID for preview
-    const sampleBallotId = `preview-${uuidv7()}`;
+    const sampleBallotId = BallotId.create().toString();
     const signature = this.generateSignature(sampleBallotId);
 
     // Publish preview ballot generation job and wait for completion

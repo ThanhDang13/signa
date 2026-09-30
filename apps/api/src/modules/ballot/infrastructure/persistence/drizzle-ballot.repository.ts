@@ -121,6 +121,19 @@ export class DrizzleBallotRepository implements BallotRepository {
       });
   }
 
+  async update(ballot: Ballot): Promise<void> {
+    const ballotId = ballot.id.toString();
+
+    await this.db
+      .update(schemas.ballots)
+      .set({
+        status: ballot.status,
+        pdfS3Key: ballot.pdfS3Key ?? null,
+        updatedAt: ballot.updatedAt.toISOString()
+      })
+      .where(eq(schemas.ballots.id, ballotId));
+  }
+
   async delete(id: string): Promise<void> {
     await this.db.delete(schemas.ballots).where(eq(schemas.ballots.id, id));
   }

@@ -73,7 +73,11 @@ export const ballotFieldOptionSchema = z.object({
 export const ballotFieldSchema = z.object({
   id: z.string(),
   label: z.string(),
-  options: z.array(ballotFieldOptionSchema)
+  options: z.array(ballotFieldOptionSchema),
+  // Validation rules for result processing (optional during compatibility transition)
+  type: z.enum([FIELD_TYPES.CHECKBOX, FIELD_TYPES.RADIO, FIELD_TYPES.TEXT]).optional(),
+  required: z.boolean().optional(),
+  method: z.enum([PROCESSING_METHODS.OMR, PROCESSING_METHODS.OCR]).optional()
 });
 
 export const ballotLayoutSchema = z.object({

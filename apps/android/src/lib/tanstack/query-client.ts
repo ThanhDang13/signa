@@ -1,10 +1,5 @@
-import { router } from "expo-router";
-import {
-  MutationCache,
-  QueryClient,
-  QueryClientConfig,
-  QueryKey
-} from "@tanstack/react-query";
+import { Route, router } from "expo-router";
+import { MutationCache, QueryClient, QueryClientConfig, QueryKey } from "@tanstack/react-query";
 
 declare module "@tanstack/react-query" {
   interface Register {
@@ -12,7 +7,7 @@ declare module "@tanstack/react-query" {
       invalidatesQuery?: QueryKey[];
       successMessage?: string;
       errorMessage?: string;
-      redirectTo?: string;
+      redirectTo?: Route;
       replace?: boolean;
     };
   }
@@ -38,9 +33,9 @@ function makeQueryClient() {
 
         if (mutation.meta?.redirectTo) {
           if (mutation.meta.replace) {
-            router.replace(mutation.meta.redirectTo as any);
+            router.replace(mutation.meta.redirectTo);
           } else {
-            router.push(mutation.meta.redirectTo as any);
+            router.push(mutation.meta.redirectTo);
           }
         }
       },

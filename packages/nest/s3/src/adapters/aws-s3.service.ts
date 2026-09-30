@@ -36,6 +36,7 @@ export interface AwsS3Config {
     secretAccessKey: string;
   };
   endpoint?: string;
+  publicEndpoint?: string;
   forcePathStyle?: boolean;
 }
 
@@ -44,14 +45,25 @@ export interface AwsS3Config {
  */
 export class AwsS3Service implements S3Service {
   private readonly client: S3Client;
+  private readonly publicClient: S3Client;
   private readonly bucket: string;
 
   constructor(config: AwsS3Config) {
     this.bucket = config.bucket;
+
+    // Private client for internal operations
     this.client = new S3Client({
       region: config.region,
       credentials: config.credentials,
       endpoint: config.endpoint,
+      forcePathStyle: config.forcePathStyle ?? false
+    });
+
+    // Public client for presigned URLs
+    this.publicClient = new S3Client({
+      region: config.region,
+      credentials: config.credentials,
+      endpoint: config.publicEndpoint ?? config.endpoint,
       forcePathStyle: config.forcePathStyle ?? false
     });
   }
@@ -186,7 +198,7 @@ export class AwsS3Service implements S3Service {
         Key: key
       });
 
-      return await getSignedUrl(this.client, command, { expiresIn });
+      return await getSignedUrl(this.publicClient, command, { expiresIn });
     } catch (error) {
       throw createError(S3_PRESIGNED_URL_FAILED.code, {
         cause: error instanceof Error ? error : new Error(String(error)),
@@ -202,7 +214,7 @@ export class AwsS3Service implements S3Service {
         Key: key
       });
 
-      return await getSignedUrl(this.client, command, { expiresIn });
+      return await getSignedUrl(this.publicClient, command, { expiresIn });
     } catch (error) {
       throw createError(S3_PRESIGNED_URL_FAILED.code, {
         cause: error instanceof Error ? error : new Error(String(error)),

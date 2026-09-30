@@ -12,7 +12,8 @@
         "main": "packages/dsl/queue-contract/src/index.ts",
         "tsConfig": "packages/dsl/queue-contract/tsconfig.lib.json",
         "assets": ["packages/dsl/queue-contract/src/assets"],
-        "stripLeadingPaths": true
+        "stripLeadingPaths": true,
+        "generatePackageJson": false
       },
       "configurations": {
         "development": {

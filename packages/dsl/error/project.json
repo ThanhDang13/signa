@@ -12,7 +12,8 @@
         "main": "packages/dsl/error/src/index.ts",
         "tsConfig": "packages/dsl/error/tsconfig.lib.json",
         "assets": ["packages/dsl/error/src/assets"],
-        "stripLeadingPaths": true
+        "stripLeadingPaths": true,
+        "generatePackageJson": false
       },
       "configurations": {
         "development": {

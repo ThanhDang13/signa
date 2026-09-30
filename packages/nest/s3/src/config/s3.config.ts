@@ -16,6 +16,7 @@ export const s3ConfigSchema = z.object({
   region: z.string(),
   credentials: s3CredentialsSchema,
   endpoint: z.string().optional(),
+  publicEndpoint: z.string().optional(),
   forcePathStyle: z.boolean().optional().default(false)
 });
 

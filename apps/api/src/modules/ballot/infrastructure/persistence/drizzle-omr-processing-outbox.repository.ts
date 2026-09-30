@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { eq } from "drizzle-orm";
+import { eq, desc, count } from "drizzle-orm";
 import { InjectDatabase } from "@signa/nest-drizzle";
 import * as schemas from "@signa/runtime-drizzle/schemas";
 import { OmrProcessingRequest } from "@signa/api/modules/ballot/domain/entities";
@@ -17,6 +17,7 @@ export class DrizzleOmrProcessingOutboxRepository implements OmrProcessingOutbox
     await this.db.insert(schemas.omrProcessingOutbox).values({
       id: request.id,
       ballotId: request.ballotId,
+      userId: request.userId,
       s3Key: request.s3Key,
       status: request.status,
       attempts: request.attempts,
@@ -38,6 +39,30 @@ export class DrizzleOmrProcessingOutboxRepository implements OmrProcessingOutbox
       OmrProcessingRequest.rehydrate({
         id: row.id,
         ballotId: row.ballotId,
+        userId: row.userId,
+        s3Key: row.s3Key,
+        status: row.status as any,
+        attempts: row.attempts,
+        lastError: row.lastError ?? undefined,
+        processedAt: row.processedAt ?? undefined,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt
+      })
+    );
+  }
+
+  async findProcessing(limit: number): Promise<OmrProcessingRequest[]> {
+    const rows = await this.db
+      .select()
+      .from(schemas.omrProcessingOutbox)
+      .where(eq(schemas.omrProcessingOutbox.status, "processing"))
+      .limit(limit);
+
+    return rows.map((row) =>
+      OmrProcessingRequest.rehydrate({
+        id: row.id,
+        ballotId: row.ballotId,
+        userId: row.userId,
         s3Key: row.s3Key,
         status: row.status as any,
         attempts: row.attempts,
@@ -53,6 +78,7 @@ export class DrizzleOmrProcessingOutboxRepository implements OmrProcessingOutbox
     await this.db
       .update(schemas.omrProcessingOutbox)
       .set({
+        s3Key: request.s3Key,
         status: request.status,
         attempts: request.attempts,
         lastError: request.lastError,
@@ -60,5 +86,112 @@ export class DrizzleOmrProcessingOutboxRepository implements OmrProcessingOutbox
         updatedAt: request.updatedAt.toISOString()
       })
       .where(eq(schemas.omrProcessingOutbox.id, request.id));
+  }
+
+  async findById(id: string): Promise<OmrProcessingRequest | null> {
+    const rows = await this.db
+      .select()
+      .from(schemas.omrProcessingOutbox)
+      .where(eq(schemas.omrProcessingOutbox.id, id))
+      .limit(1);
+
+    if (rows.length === 0) return null;
+
+    const row = rows[0];
+    return OmrProcessingRequest.rehydrate({
+      id: row.id,
+      ballotId: row.ballotId,
+      userId: row.userId,
+      s3Key: row.s3Key,
+      status: row.status as any,
+      attempts: row.attempts,
+      lastError: row.lastError ?? undefined,
+      processedAt: row.processedAt ?? undefined,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt
+    });
+  }
+
+  async findByBallotId(ballotId: string): Promise<OmrProcessingRequest | null> {
+    const rows = await this.db
+      .select()
+      .from(schemas.omrProcessingOutbox)
+      .where(eq(schemas.omrProcessingOutbox.ballotId, ballotId))
+      .orderBy(desc(schemas.omrProcessingOutbox.createdAt))
+      .limit(1);
+
+    if (rows.length === 0) return null;
+
+    const row = rows[0];
+    return OmrProcessingRequest.rehydrate({
+      id: row.id,
+      ballotId: row.ballotId,
+      userId: row.userId,
+      s3Key: row.s3Key,
+      status: row.status as any,
+      attempts: row.attempts,
+      lastError: row.lastError ?? undefined,
+      processedAt: row.processedAt ?? undefined,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt
+    });
+  }
+
+  async findByS3Key(s3Key: string): Promise<OmrProcessingRequest | null> {
+    const rows = await this.db
+      .select()
+      .from(schemas.omrProcessingOutbox)
+      .where(eq(schemas.omrProcessingOutbox.s3Key, s3Key))
+      .limit(1);
+
+    if (rows.length === 0) return null;
+
+    const row = rows[0];
+    return OmrProcessingRequest.rehydrate({
+      id: row.id,
+      ballotId: row.ballotId,
+      userId: row.userId,
+      s3Key: row.s3Key,
+      status: row.status as any,
+      attempts: row.attempts,
+      lastError: row.lastError ?? undefined,
+      processedAt: row.processedAt ?? undefined,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt
+    });
+  }
+
+  async findByUserId(userId: string, limit: number, offset: number): Promise<OmrProcessingRequest[]> {
+    const rows = await this.db
+      .select()
+      .from(schemas.omrProcessingOutbox)
+      .where(eq(schemas.omrProcessingOutbox.userId, userId))
+      .orderBy(desc(schemas.omrProcessingOutbox.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    return rows.map((row) =>
+      OmrProcessingRequest.rehydrate({
+        id: row.id,
+        ballotId: row.ballotId,
+        userId: row.userId,
+        s3Key: row.s3Key,
+        status: row.status as any,
+        attempts: row.attempts,
+        lastError: row.lastError ?? undefined,
+        processedAt: row.processedAt ?? undefined,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt
+      })
+    );
+  }
+
+  async countByUserId(userId: string): Promise<number> {
+    const result = await this.db
+      .select({ count: count() })
+      .from(schemas.omrProcessingOutbox)
+      .where(eq(schemas.omrProcessingOutbox.userId, userId));
+
+    return result[0]?.count ?? 0;
   }
 }

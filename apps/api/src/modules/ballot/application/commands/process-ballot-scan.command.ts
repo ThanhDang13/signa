@@ -3,6 +3,7 @@ import { Command } from "@nestjs/cqrs";
 export type ProcessBallotScanCommandPayload = {
   ballotId: string;
   s3Key: string;
+  userId: string;
 };
 
 export type ProcessBallotScanCommandResult = {

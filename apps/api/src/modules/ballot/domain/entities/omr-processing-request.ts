@@ -11,7 +11,10 @@ export class OmrProcessingRequest extends BaseEntity {
   public readonly ballotId!: string;
 
   @Accessor({ readonly: true })
-  public readonly s3Key!: string;
+  public readonly userId!: string;
+
+  @Accessor({ touchOnSet: true })
+  public s3Key!: string;
 
   @Accessor({ touchOnSet: true })
   public status!: OmrRequestStatus;
@@ -29,6 +32,7 @@ export class OmrProcessingRequest extends BaseEntity {
     props: {
       id: string;
       ballotId: string;
+      userId: string;
       s3Key: string;
       status: OmrRequestStatus;
       attempts: number;
@@ -40,6 +44,7 @@ export class OmrProcessingRequest extends BaseEntity {
     super(isNew);
     this.id = props.id;
     this.ballotId = props.ballotId;
+    this.userId = props.userId;
     this.s3Key = props.s3Key;
     this.status = props.status;
     this.attempts = props.attempts;
@@ -47,10 +52,11 @@ export class OmrProcessingRequest extends BaseEntity {
     this.processedAt = props.processedAt;
   }
 
-  static create(props: { ballotId: string; s3Key: string }): OmrProcessingRequest {
+  static create(props: { ballotId: string; userId: string; s3Key: string }): OmrProcessingRequest {
     return new OmrProcessingRequest({
       id: uuidv7(),
       ballotId: props.ballotId,
+      userId: props.userId,
       s3Key: props.s3Key,
       status: "pending",
       attempts: 0
@@ -60,6 +66,7 @@ export class OmrProcessingRequest extends BaseEntity {
   static rehydrate(props: {
     id: string;
     ballotId: string;
+    userId: string;
     s3Key: string;
     status: OmrRequestStatus;
     attempts: number;
@@ -72,6 +79,7 @@ export class OmrProcessingRequest extends BaseEntity {
       {
         id: props.id,
         ballotId: props.ballotId,
+        userId: props.userId,
         s3Key: props.s3Key,
         status: props.status,
         attempts: props.attempts,
@@ -110,5 +118,21 @@ export class OmrProcessingRequest extends BaseEntity {
 
   isPending(): boolean {
     return this.status === "pending";
+  }
+
+  isActive(): boolean {
+    return this.status === "pending" || this.status === "processing";
+  }
+
+  isTerminal(): boolean {
+    return this.status === "completed" || this.status === "failed";
+  }
+
+  resetForRetry(newS3Key: string): void {
+    this.s3Key = newS3Key;
+    this.status = "pending";
+    this.attempts = 0;
+    this.lastError = undefined;
+    this.processedAt = undefined;
   }
 }

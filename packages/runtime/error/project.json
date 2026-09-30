@@ -12,7 +12,8 @@
         "main": "packages/runtime/error/src/index.ts",
         "tsConfig": "packages/runtime/error/tsconfig.lib.json",
         "assets": [],
-        "stripLeadingPaths": true
+        "stripLeadingPaths": true,
+        "generatePackageJson": false
       },
       "configurations": {
         "development": {

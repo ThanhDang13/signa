@@ -3,12 +3,12 @@ import { Global, Module } from "@nestjs/common";
 import type { S3Service } from "../ports/s3-service.port";
 import { S3_SERVICE } from "../ports/s3-service.port";
 
-import {
-  NEST_S3_OPTIONS,
+import type {
   NestS3Options,
   NestS3ModuleAsyncOptions,
   NestS3OptionsFactory
 } from "./s3.module-options";
+import { NEST_S3_OPTIONS } from "./s3.module-options";
 
 /**
  * S3 module for object storage operations

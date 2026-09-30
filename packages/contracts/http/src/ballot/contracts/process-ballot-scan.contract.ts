@@ -8,7 +8,7 @@ import {
 export const processBallotScanContract = defineContract({
   method: "POST",
   path: "/v1/ballots/:ballotId/process-scan",
-  pathParams: processBallotScanParamsSchema,
+  params: processBallotScanParamsSchema,
   body: processBallotScanSchema,
   response: processBallotScanResponseSchema
 });

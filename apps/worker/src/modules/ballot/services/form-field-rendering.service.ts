@@ -37,11 +37,14 @@ export class FormFieldRenderingService {
       doc.fillColor("black").fontSize(14).font("Helvetica-Bold").text(field.label, leftMargin, startY);
       doc.moveDown(0.3);
 
-      // Track field layout
+      // Track field layout with validation rules for scan result processing
       const fieldLayout: BallotLayout["fields"][0] = {
         id: field.id,
         label: field.label,
-        options: []
+        options: [],
+        type: field.type,
+        required: field.required,
+        method: field.method
       };
 
       // Draw field based on type

@@ -2,7 +2,8 @@
   "name": "@signa/runtime-error",
   "version": "0.0.1",
   "private": true,
-  "main": "./index.js",
+  "files": ["dist"],
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     "./package.json": "./package.json",
