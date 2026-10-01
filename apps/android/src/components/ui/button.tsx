@@ -1,6 +1,7 @@
 import { TextClassContext } from '@signa/android/components/ui/text';
 import { cn } from '@signa/android/lib/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
 import { Platform, Pressable } from 'react-native';
 
 const buttonVariants = cva(
@@ -88,19 +89,24 @@ const buttonTextVariants = cva(
   }
 );
 
-type ButtonProps = React.ComponentProps<typeof Pressable> & React.RefAttributes<typeof Pressable> & VariantProps<typeof buttonVariants>;
+type ButtonProps = React.ComponentPropsWithoutRef<typeof Pressable> & VariantProps<typeof buttonVariants>;
 
-function Button({ className, variant, size, ...props }: ButtonProps) {
-  return (
-    <TextClassContext.Provider value={buttonTextVariants({ variant, size })}>
-      <Pressable
-        className={cn(props.disabled && 'opacity-50', buttonVariants({ variant, size }), className)}
-        role="button"
-        {...props}
-      />
-    </TextClassContext.Provider>
-  );
-}
+const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>(
+  ({ className, variant, size, ...props }, ref) => {
+    return (
+      <TextClassContext.Provider value={buttonTextVariants({ variant, size })}>
+        <Pressable
+          ref={ref}
+          className={cn(props.disabled && 'opacity-50', buttonVariants({ variant, size }), className)}
+          role="button"
+          {...props}
+        />
+      </TextClassContext.Provider>
+    );
+  }
+);
+
+Button.displayName = 'Button';
 
 export { Button, buttonTextVariants, buttonVariants };
 export type { ButtonProps };

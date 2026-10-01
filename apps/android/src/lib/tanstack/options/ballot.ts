@@ -8,7 +8,8 @@ import {
   getScanRequestContract,
   listScanRequestsContract,
   processBallotScanContract,
-  pollScanStatusContract
+  pollScanStatusContract,
+  retryScanContract
 } from "@signa/contracts-http";
 
 export type FilterType = "all" | "valid" | "invalid" | "pending" | "processing";
@@ -85,6 +86,14 @@ export const ballotMutations = {
       mutationKey: ballotKeys.processScan(""),
       mutationFn: async (options: CallOptions<typeof processBallotScanContract>) => {
         return authenticatedClient.call(processBallotScanContract, options);
+      }
+    }),
+
+  retryScan: () =>
+    mutationOptions({
+      mutationKey: ["retry-scan"],
+      mutationFn: async (options: CallOptions<typeof retryScanContract>) => {
+        return authenticatedClient.call(retryScanContract, options);
       }
     })
 };

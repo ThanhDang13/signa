@@ -1,59 +1,41 @@
 import { Stack, useRouter, useSegments } from "expo-router";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Provider as JotaiProvider, useAtomValue, useSetAtom } from "jotai";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { Provider as JotaiProvider } from "jotai";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "@signa/android/global.css";
 import { PortalHost } from "@rn-primitives/portal";
 import { getQueryClient } from "@signa/android/lib/tanstack/query-client";
-import { authTokensAtom, initAuthAtom } from "@signa/android/lib/atoms/auth";
 import { useEffect } from "react";
 import { View } from "react-native";
 import { useColorScheme } from "nativewind";
 import { NAV_THEME } from "@signa/android/lib/theme";
 import { Theme, ThemeProvider } from "@react-navigation/native";
 import { Toaster } from "@signa/android/components/ui/toaster";
+import { getMeOptions } from "@signa/android/lib/tanstack/options/auth";
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
-  const tokens = useAtomValue(authTokensAtom);
   const segments = useSegments();
   const router = useRouter();
-  const initAuth = useSetAtom(initAuthAtom);
 
-  // Initialize auth from storage on mount
-  useEffect(() => {
-    console.log("[AuthGuard] Initializing auth from storage");
-    initAuth();
-  }, [initAuth]);
+  // Query /me endpoint - single source of truth for auth state
+  const { data: user, isLoading } = useQuery(getMeOptions());
 
-  // Derive authentication status synchronously from tokens
-  const isAuthenticated = tokens !== null && tokens?.accessToken !== "";
-
-  console.log("[AuthGuard] Render:", {
-    tokens: tokens ? { hasAccess: !!tokens.accessToken, hasRefresh: !!tokens.refreshToken } : null,
-    isAuthenticated,
-    segments,
-    inAuthGroup: segments[0] === "(auth)"
-  });
+  // Derive authentication status purely from query data
+  const isAuthenticated = user !== undefined;
+  const inAuthGroup = segments[0] === "(auth)";
 
   useEffect(() => {
-    const inAuthGroup = segments[0] === "(auth)";
-
-    console.log("[AuthGuard] Effect triggered:", {
-      isAuthenticated,
-      inAuthGroup,
-      segments
-    });
+    // Wait for initial query to complete
+    if (isLoading) return;
 
     if (!isAuthenticated && !inAuthGroup) {
       // Not authenticated and not on auth screens -> redirect to login
-      console.log("[AuthGuard] Redirecting to login - not authenticated");
       router.replace("/(auth)/login");
     } else if (isAuthenticated && inAuthGroup) {
       // Authenticated but on auth screens -> redirect to home
-      console.log("[AuthGuard] Redirecting to home - authenticated in auth group");
       router.replace("/");
     }
-  }, [isAuthenticated, segments, router]);
+  }, [isAuthenticated, inAuthGroup, isLoading, segments, router]);
 
   return <>{children}</>;
 }

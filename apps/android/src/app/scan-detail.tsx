@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   CheckCircle,
   Clock,
+  RefreshCw,
   XCircle,
 } from "lucide-react-native";
 
@@ -427,6 +428,22 @@ export default function ScanDetailScreen() {
             </View>
           </View>
 
+          {/* Retry Button */}
+          {(data.status === "failed" ||
+            (data.status === "completed" && data.result?.validationStatus !== "valid")) && (
+            <View className="mt-6">
+              <Button
+                variant="default"
+                size="lg"
+                onPress={() =>
+                  router.push(`/scan-retry?requestId=${data.requestId}&ballotId=${data.ballotId}`)
+                }
+              >
+                <Icon as={RefreshCw} size={20} className="text-primary-foreground" />
+                <Text>Thử lại</Text>
+              </Button>
+            </View>
+          )}
         </View>
       </ScrollView>
     </View>

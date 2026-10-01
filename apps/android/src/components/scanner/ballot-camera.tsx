@@ -60,6 +60,7 @@ interface BallotCameraProps {
     quality: ImageQualityResult,
   ) => void;
   onClose: () => void;
+  expectedBallotId?: string; // For retry flow - validates QR matches this ballot
 }
 
 /**
@@ -262,11 +263,30 @@ function didQrMove(previous: string, current: string) {
   );
 }
 
-function getQrToast(result: QrExtractionResult) {
+function getQrToast(result: QrExtractionResult, expectedBallotId?: string) {
   if (result.error === "decode_failed") {
     return {
       title: "QR không hợp lệ",
       description: "Không thể giải mã dữ liệu QR",
+      variant: "error" as const,
+      icon: AlertCircle,
+    };
+  }
+
+  if (result.error === "not_found") {
+    return {
+      title: "Không đọc được QR",
+      description: "Vui lòng đưa mã QR vào khung",
+      variant: "warning" as const,
+      icon: AlertCircle,
+    };
+  }
+
+  // If we have an expected ballot ID and it doesn't match
+  if (expectedBallotId && result.ballotId && result.ballotId !== expectedBallotId) {
+    return {
+      title: "Mã QR không khớp",
+      description: "Vui lòng chụp đúng phiếu bầu cần thử lại",
       variant: "error" as const,
       icon: AlertCircle,
     };
@@ -280,7 +300,7 @@ function getQrToast(result: QrExtractionResult) {
   };
 }
 
-export function BallotCamera({ onCapture, onClose }: BallotCameraProps) {
+export function BallotCamera({ onCapture, onClose, expectedBallotId }: BallotCameraProps) {
   const [facing] = useState<CameraType>("back");
   const [permission, requestPermission] = useCameraPermissions();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -337,10 +357,24 @@ export function BallotCamera({ onCapture, onClose }: BallotCameraProps) {
     if (isRepeatedDetection) return;
     lastQrDetection.current = { fingerprint, timestamp: now };
 
+    // If we have a valid QR code
     if (qrResult.ballotId) {
+      // Check if it matches expected ballot ID (retry flow)
+      if (expectedBallotId && qrResult.ballotId !== expectedBallotId) {
+        toast({
+          title: "Mã QR không khớp",
+          description: "Vui lòng chụp đúng phiếu bầu cần thử lại",
+          variant: "error",
+          icon: AlertCircle,
+          duration: 2200,
+        });
+        return;
+      }
+
+      // Valid QR code (and matches expected ballot if in retry mode)
       toast({
         title: "QR hợp lệ",
-        description: "Đã nhận diện mã QR",
+        description: expectedBallotId ? "Đúng phiếu bầu cần thử lại" : "Đã nhận diện mã QR",
         variant: "success",
         icon: CheckCircle,
         duration: 1800,
@@ -348,7 +382,7 @@ export function BallotCamera({ onCapture, onClose }: BallotCameraProps) {
       return;
     }
 
-    const qrToast = getQrToast(qrResult);
+    const qrToast = getQrToast(qrResult, expectedBallotId);
     toast({ ...qrToast, duration: 2200 });
   };
 

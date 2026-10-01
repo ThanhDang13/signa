@@ -5,13 +5,16 @@ import { Argon2PasswordHasher } from "@signa/api/modules/identity/infrastructure
 import { USER_REPOSITORY } from "@signa/api/modules/identity/application/ports";
 import { PASSWORD_HASHER } from "@signa/api/modules/identity/domain/ports";
 import * as CommandHandlers from "@signa/api/modules/identity/application/commands/handlers";
+import * as QueryHandlers from "@signa/api/modules/identity/application/queries/handlers";
 
 const commandHandlers = Object.values(CommandHandlers);
+const queryHandlers = Object.values(QueryHandlers);
 
 @Module({
   controllers: [IdentityController],
   providers: [
     ...commandHandlers,
+    ...queryHandlers,
     { provide: USER_REPOSITORY, useClass: DrizzleUserRepository },
     { provide: PASSWORD_HASHER, useClass: Argon2PasswordHasher }
   ],

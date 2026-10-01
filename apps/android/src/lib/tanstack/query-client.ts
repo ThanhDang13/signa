@@ -5,6 +5,8 @@ declare module "@tanstack/react-query" {
   interface Register {
     mutationMeta: {
       invalidatesQuery?: QueryKey[];
+      refetchQuery?: QueryKey[];
+      removeQuery?: QueryKey[];
       successMessage?: string;
       errorMessage?: string;
       redirectTo?: Route;
@@ -25,11 +27,18 @@ function makeQueryClient() {
   const queryClient = new QueryClient({
     defaultOptions: queryDefaultOptions,
     mutationCache: new MutationCache({
-      onSuccess: (_data, _variables, _context, mutation) => {
+      onSuccess: async (_data, _variables, _context, mutation) => {
         // TODO: Add toast/snackbar notification here
         // if (mutation.meta?.successMessage) {
         //   showSnackbar(mutation.meta.successMessage, "success");
         // }
+
+        // Refetch queries that need immediate data (e.g., /me after login)
+        const refetchKeys = mutation.meta?.refetchQuery;
+        if (refetchKeys) {
+          const list = Array.isArray(refetchKeys) ? refetchKeys : [refetchKeys];
+          await Promise.all(list.map((queryKey) => queryClient.refetchQueries({ queryKey })));
+        }
 
         if (mutation.meta?.redirectTo) {
           if (mutation.meta.replace) {
@@ -48,11 +57,20 @@ function makeQueryClient() {
       },
 
       onSettled: (_data, _error, _variables, _context, mutation) => {
+        // Remove queries (e.g., logout should clear /me cache)
+        const removeKeys = mutation.meta?.removeQuery;
+        if (removeKeys) {
+          const list = Array.isArray(removeKeys) ? removeKeys : [removeKeys];
+          list.forEach((queryKey) => queryClient.removeQueries({ queryKey }));
+        }
+
         const keys = mutation.meta?.invalidatesQuery;
         if (!keys) return;
 
         const list = Array.isArray(keys) ? keys : [keys];
-        list.forEach((queryKey) => queryClient.invalidateQueries({ queryKey }));
+        list.forEach((queryKey) => {
+          queryClient.refetchQueries({ queryKey });
+        });
       }
     })
   });

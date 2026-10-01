@@ -4,8 +4,8 @@ import { Button } from "@signa/android/components/ui/button";
 import { Icon } from "@signa/android/components/ui/icon";
 import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
-import { useSetAtom } from "jotai";
-import { logoutAtom } from "@signa/android/lib/atoms/auth";
+import { useMutation } from "@tanstack/react-query";
+import { authMutations } from "@signa/android/lib/tanstack/options/auth";
 import { ThemeToggle } from "@signa/android/components/theme-toggle";
 import { ArrowLeft, Moon, LogOut, HelpCircle, Info } from "lucide-react-native";
 import { useColorScheme } from "nativewind";
@@ -13,11 +13,11 @@ import Constants from "expo-constants";
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const logout = useSetAtom(logoutAtom);
+  const logoutMutation = useMutation(authMutations.logout());
   const { colorScheme } = useColorScheme();
 
   const handleLogout = () => {
-    logout();
+    logoutMutation.mutate();
   };
 
   const handleContactSupport = () => {
