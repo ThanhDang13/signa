@@ -13,7 +13,7 @@ export async function bootstrap() {
   app.enableShutdownHooks();
 
   logger.log("Worker application started successfully");
-  logger.log("Listening for jobs on ballot-generation queue");
+  logger.log("Registered processors will listen for jobs on their respective queues");
 
   // Keep the process alive
   process.on("SIGTERM", async () => {

@@ -45,8 +45,10 @@ export const omrProcessingOutbox = pgTable(
     s3Key: text("s3_key").notNull(),
     status: outboxStatusEnum("status").notNull().default("pending").$type<OutboxStatus>(),
     attempts: integer("attempts").notNull().default(0),
+    dispatchId: uuid("dispatch_id"),
     lastError: text("last_error"),
     processedAt: ISO8601Timestamp("processed_at", { withTimezone: true }),
+    processingStartedAt: ISO8601Timestamp("processing_started_at", { withTimezone: true }),
     ...timestamps
   },
   (table) => ({

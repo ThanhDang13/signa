@@ -1,0 +1,1 @@
+ALTER TABLE "omr_processing_outbox" ADD COLUMN "dispatch_id" uuid;

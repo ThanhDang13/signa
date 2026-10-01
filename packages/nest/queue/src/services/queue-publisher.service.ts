@@ -21,12 +21,6 @@ export interface JobInfo<T = unknown> {
   stacktrace?: string[] | null;
 }
 
-export interface PublishResult<T> {
-  jobId: string;
-  onCompleted(callback: (result: T) => void | Promise<void>): PublishResult<T>;
-  onFailed(callback: (error: Error) => void | Promise<void>): PublishResult<T>;
-}
-
 /**
  * Queue publisher service for adding jobs to queues using contracts
  *
@@ -38,25 +32,14 @@ export interface PublishResult<T> {
  *     private readonly queuePublisher: QueuePublisher
  *   ) {}
  *
- *   // Fire-and-forget
- *   async scanBallot(s3Key: string) {
- *     const { jobId } = await this.queuePublisher.publish(processBallotJob, { s3Key });
+ *   // Fire-and-forget with explicit jobId
+ *   async scanBallot(requestId: string, attempt: number, s3Key: string) {
+ *     const jobId = `${requestId}-${attempt}`;
+ *     await this.queuePublisher.publish(processBallotJob, { s3Key }, { jobId });
  *     return { jobId };
  *   }
  *
- *   // With callbacks
- *   async scanBallotWithCallbacks(s3Key: string) {
- *     await this.queuePublisher
- *       .publish(processBallotJob, { s3Key })
- *       .onCompleted((result) => {
- *         console.log('Ballot processed:', result);
- *       })
- *       .onFailed((error) => {
- *         console.error('Processing failed:', error);
- *       });
- *   }
- *
- *   // Wait for result
+ *   // Wait for result (synchronous)
  *   async scanBallotSync(s3Key: string) {
  *     const result = await this.queuePublisher.publishAndWait(processBallotJob, { s3Key });
  *     return result;
@@ -67,42 +50,39 @@ export interface PublishResult<T> {
 @Injectable()
 export class QueuePublisher implements OnModuleDestroy {
   private queues = new Map<string, Queue>();
-  private queueEvents = new Map<string, QueueEvents>();
 
   /**
-   * Publish a job to a queue (fire-and-forget with optional callbacks)
+   * Publish a job to a queue (fire-and-forget)
+   *
+   * @param contract - Job contract defining the queue and data schema
+   * @param data - Job data
+   * @param options - Job options (jobId is required for deduplication)
+   * @returns Job ID
    */
   async publish<T extends JobContract>(
     contract: T,
     data: InferJobData<T>,
-    options?: {
+    options: {
+      jobId: string;
       delay?: number;
       attempts?: number;
       priority?: number;
     }
-  ): Promise<PublishResult<InferJobResult<T>>> {
+  ): Promise<{ jobId: string }> {
     const queue = this.getQueue(contract.queue);
 
     try {
       // Validate data with contract schema
       const validatedData = contract.data.parse(data);
 
-      const job = await queue.add(contract.job, validatedData, options);
-      const jobId = job.id!;
+      const job = await queue.add(contract.job, validatedData, {
+        jobId: options.jobId,
+        delay: options.delay,
+        attempts: options.attempts ?? 1, // Default to 1 attempt (retry controlled by outbox)
+        priority: options.priority
+      });
 
-      const result: PublishResult<InferJobResult<T>> = {
-        jobId,
-        onCompleted: (callback) => {
-          this.setupCompletedListener(contract.queue, queue, jobId, contract.result, callback);
-          return result;
-        },
-        onFailed: (callback) => {
-          this.setupFailedListener(contract.queue, queue, jobId, callback);
-          return result;
-        }
-      };
-
-      return result;
+      return { jobId: job.id! };
     } catch (error) {
       if (error instanceof ZodError) {
         throw createJobValidationError(contract.job, "data", error);
@@ -126,8 +106,12 @@ export class QueuePublisher implements OnModuleDestroy {
     }
   ): Promise<InferJobResult<T>> {
     const queue = this.getQueue(contract.queue);
-    const queueEvents = this.getQueueEvents(contract.queue, queue);
     const timeout = options?.timeout ?? 30000;
+
+    // Create QueueEvents for this operation
+    const queueEvents = new QueueEvents(contract.queue, {
+      connection: queue.opts.connection
+    });
 
     try {
       // Validate data with contract schema
@@ -154,6 +138,8 @@ export class QueuePublisher implements OnModuleDestroy {
         throw createJobValidationError(contract.job, "data", error);
       }
       throw createJobPublishError(contract.job, contract.queue, error as Error);
+    } finally {
+      await queueEvents.close();
     }
   }
 
@@ -191,12 +177,10 @@ export class QueuePublisher implements OnModuleDestroy {
   }
 
   /**
-   * Clean up QueueEvents on module destroy
+   * Clean up on module destroy
    */
   async onModuleDestroy(): Promise<void> {
-    const closePromises = Array.from(this.queueEvents.values()).map((qe) => qe.close());
-    await Promise.all(closePromises);
-    this.queueEvents.clear();
+    // No QueueEvents to clean up anymore
   }
 
   private getQueue(name: string): Queue {
@@ -205,69 +189,6 @@ export class QueuePublisher implements OnModuleDestroy {
       throw createQueueNotFoundError(name);
     }
     return queue;
-  }
-
-  private getQueueEvents(name: string, queue: Queue): QueueEvents {
-    let queueEvents = this.queueEvents.get(name);
-
-    if (!queueEvents) {
-      queueEvents = new QueueEvents(name, {
-        connection: queue.opts.connection
-      });
-      this.queueEvents.set(name, queueEvents);
-    }
-
-    return queueEvents;
-  }
-
-  private setupCompletedListener<T>(
-    queueName: string,
-    queue: Queue,
-    jobId: string,
-    resultSchema: any,
-    callback: (result: T) => void | Promise<void>
-  ): void {
-    const queueEvents = this.getQueueEvents(queueName, queue);
-
-    const listener = async ({ jobId: completedJobId, returnvalue }: any) => {
-      if (completedJobId === jobId) {
-        try {
-          const validatedResult = resultSchema ? resultSchema.parse(returnvalue) : returnvalue;
-          await callback(validatedResult as T);
-        } catch (error) {
-          // Log validation errors but don't throw
-          console.error(`Result validation failed for job ${jobId}:`, error);
-        } finally {
-          queueEvents.off("completed", listener);
-        }
-      }
-    };
-
-    queueEvents.on("completed", listener);
-  }
-
-  private setupFailedListener(
-    queueName: string,
-    queue: Queue,
-    jobId: string,
-    callback: (error: Error) => void | Promise<void>
-  ): void {
-    const queueEvents = this.getQueueEvents(queueName, queue);
-
-    const listener = async ({ jobId: failedJobId, failedReason }: any) => {
-      if (failedJobId === jobId) {
-        try {
-          const error = new Error(failedReason || "Job failed");
-          await callback(error);
-        } catch (error) {
-          console.error(`Failed callback error for job ${jobId}:`, error);
-        } finally {
-          queueEvents.off("failed", listener);
-        }
-      }
-    };
-
-    queueEvents.on("failed", listener);
   }
 }
 

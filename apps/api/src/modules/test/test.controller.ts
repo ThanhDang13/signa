@@ -58,10 +58,16 @@ export class TestController {
     const message = body.message || "Default test message";
     const delay = body.delay;
 
-    const jobId = await this.queuePublisher.publish(testJob, {
-      message,
-      delay
-    });
+    const { jobId } = await this.queuePublisher.publish(
+      testJob,
+      {
+        message,
+        delay
+      },
+      {
+        jobId: `test-${Date.now()}` // Generate unique jobId for test job
+      }
+    );
 
     return {
       success: true,

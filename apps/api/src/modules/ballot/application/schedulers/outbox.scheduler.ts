@@ -71,45 +71,48 @@ export class BallotGenerationOutboxScheduler {
           }
         }));
 
-        // Publish batch to queue with callbacks
-        await this.queuePublisher
-          .publish(generateBallotJob, {
-            electionId: request.electionId,
-            timestamp: request.timestamp.toISOString(),
-            formStructure: election.formStructure,
-            ballots
-          })
-          .then((result) =>
-            result
-              .onCompleted(async (data) => {
-                // Create and save all ballots when generation completes
-                const ballotEntities = data.ballots.map((ballotData) => {
-                  const ballot = Ballot.create({
-                    electionId: request.electionId,
-                    signature: ballotData.signature,
-                    qrCodeData: ballotData.qrCodeData,
-                    pdfS3Key: data.batchPdfS3Key,
-                    layoutMetadata: ballotData.layout
-                  });
-
-                  // Override the generated ID with the one from the batch
-                  (ballot as any).id = { value: ballotData.ballotId, toString: () => ballotData.ballotId };
-
-                  return ballot;
-                });
-
-                await Promise.all(ballotEntities.map((ballot) => this.ballotRepo.save(ballot)));
-
-                request.markAsCompleted();
-                await this.outboxRepo.update(request);
-                this.logger.log(`Batch of ${data.ballots.length} ballot(s) generated successfully`);
-              })
-              .onFailed(async (error) => {
-                request.markAsFailed(error.message);
-                await this.outboxRepo.update(request);
-                this.logger.error(`Ballot batch generation failed: ${error.message}`);
-              })
+        // Publish batch to queue and wait for result (synchronous generation)
+        try {
+          const data = await this.queuePublisher.publishAndWait(
+            generateBallotJob,
+            {
+              electionId: request.electionId,
+              timestamp: request.timestamp.toISOString(),
+              formStructure: election.formStructure,
+              ballots
+            },
+            {
+              timeout: 60000 // 60 seconds for ballot generation
+            }
           );
+
+          // Create and save all ballots when generation completes
+          const ballotEntities = data.ballots.map((ballotData) => {
+            const ballot = Ballot.create({
+              electionId: request.electionId,
+              signature: ballotData.signature,
+              qrCodeData: ballotData.qrCodeData,
+              pdfS3Key: data.batchPdfS3Key,
+              layoutMetadata: ballotData.layout
+            });
+
+            // Override the generated ID with the one from the batch
+            (ballot as any).id = { value: ballotData.ballotId, toString: () => ballotData.ballotId };
+
+            return ballot;
+          });
+
+          await Promise.all(ballotEntities.map((ballot) => this.ballotRepo.save(ballot)));
+
+          request.markAsCompleted();
+          await this.outboxRepo.update(request);
+          this.logger.log(`Batch of ${data.ballots.length} ballot(s) generated successfully`);
+        } catch (jobError) {
+          const jobErrorMessage = jobError instanceof Error ? jobError.message : String(jobError);
+          request.markAsFailed(jobErrorMessage);
+          await this.outboxRepo.update(request);
+          this.logger.error(`Ballot batch generation failed: ${jobErrorMessage}`);
+        }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         request.markAsFailed(errorMessage);

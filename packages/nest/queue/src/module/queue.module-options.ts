@@ -24,11 +24,28 @@ export interface DefaultJobOptions {
 }
 
 /**
+ * Worker options
+ */
+export interface WorkerOptions {
+  /**
+   * Amount of time to wait in ms before fetching a new job (default: 5000ms)
+   * Lower values = faster job pickup, higher Redis load
+   */
+  drainDelay?: number;
+
+  /**
+   * Number of concurrent jobs to process (default: 1)
+   */
+  concurrency?: number;
+}
+
+/**
  * Runtime queue configuration
  */
 export interface NestQueueOptions {
   connection: RedisConnection;
   defaultJobOptions?: DefaultJobOptions;
+  workerOptions?: WorkerOptions;
 }
 
 /**

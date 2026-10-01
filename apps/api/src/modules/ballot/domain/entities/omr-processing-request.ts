@@ -28,6 +28,12 @@ export class OmrProcessingRequest extends BaseEntity {
   @Accessor({ touchOnSet: true, allowUndefined: true })
   public processedAt?: Date;
 
+  @Accessor({ touchOnSet: true, allowUndefined: true })
+  public processingStartedAt?: Date;
+
+  @Accessor({ touchOnSet: true, allowUndefined: true })
+  public dispatchId?: string;
+
   private constructor(
     props: {
       id: string;
@@ -36,8 +42,10 @@ export class OmrProcessingRequest extends BaseEntity {
       s3Key: string;
       status: OmrRequestStatus;
       attempts: number;
+      dispatchId?: string;
       lastError?: string;
       processedAt?: Date;
+      processingStartedAt?: Date;
     },
     isNew = true
   ) {
@@ -48,8 +56,10 @@ export class OmrProcessingRequest extends BaseEntity {
     this.s3Key = props.s3Key;
     this.status = props.status;
     this.attempts = props.attempts;
+    this.dispatchId = props.dispatchId;
     this.lastError = props.lastError;
     this.processedAt = props.processedAt;
+    this.processingStartedAt = props.processingStartedAt;
   }
 
   static create(props: { ballotId: string; userId: string; s3Key: string }): OmrProcessingRequest {
@@ -70,8 +80,10 @@ export class OmrProcessingRequest extends BaseEntity {
     s3Key: string;
     status: OmrRequestStatus;
     attempts: number;
+    dispatchId?: string;
     lastError?: string;
     processedAt?: string;
+    processingStartedAt?: string;
     createdAt: string;
     updatedAt: string;
   }): OmrProcessingRequest {
@@ -83,8 +95,10 @@ export class OmrProcessingRequest extends BaseEntity {
         s3Key: props.s3Key,
         status: props.status,
         attempts: props.attempts,
+        dispatchId: props.dispatchId,
         lastError: props.lastError,
-        processedAt: props.processedAt ? new Date(props.processedAt) : undefined
+        processedAt: props.processedAt ? new Date(props.processedAt) : undefined,
+        processingStartedAt: props.processingStartedAt ? new Date(props.processingStartedAt) : undefined
       },
       false
     );
@@ -95,6 +109,7 @@ export class OmrProcessingRequest extends BaseEntity {
 
   markAsProcessing(): void {
     this.status = "processing";
+    this.processingStartedAt = new Date();
   }
 
   markAsCompleted(): void {
@@ -132,7 +147,13 @@ export class OmrProcessingRequest extends BaseEntity {
     this.s3Key = newS3Key;
     this.status = "pending";
     this.attempts = 0;
+    this.dispatchId = undefined;
     this.lastError = undefined;
     this.processedAt = undefined;
+    this.processingStartedAt = undefined;
+  }
+
+  generateDispatchId(): void {
+    this.dispatchId = uuidv7();
   }
 }

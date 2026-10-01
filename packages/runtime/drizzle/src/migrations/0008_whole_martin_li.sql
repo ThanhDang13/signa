@@ -1,0 +1,1 @@
+ALTER TABLE "omr_processing_outbox" ADD COLUMN "processing_started_at" text NOT NULL;

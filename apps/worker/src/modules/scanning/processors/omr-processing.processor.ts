@@ -1,4 +1,4 @@
-import { Inject, Logger } from "@nestjs/common";
+import { Inject, Logger, OnModuleInit } from "@nestjs/common";
 import { ContractWorker, JobHandler, Processor } from "@signa/nest-queue";
 import { processBallotJob } from "@signa/contracts-queue/scanning";
 import type { Job } from "bullmq";
@@ -12,8 +12,11 @@ import { QrVerificationService } from "@signa/worker/modules/scanning/services/q
 import { MarkDetectionService } from "@signa/worker/modules/scanning/services/mark-detection.service";
 import { OpenCvService, type CvMat } from "@signa/worker/modules/scanning/services/opencv.service";
 
-@Processor(processBallotJob.queue)
-export class OmrProcessingProcessor extends ContractWorker {
+@Processor(processBallotJob.queue, {
+  concurrency: 1,
+  drainDelay: 5
+})
+export class OmrProcessingProcessor extends ContractWorker implements OnModuleInit {
   private readonly logger = new Logger(OmrProcessingProcessor.name);
 
   constructor(
@@ -26,6 +29,11 @@ export class OmrProcessingProcessor extends ContractWorker {
     private readonly config: AppConfig
   ) {
     super();
+    this.logger.log("OmrProcessingProcessor instantiated - ready to process scan jobs");
+  }
+
+  onModuleInit() {
+    this.logger.log("OmrProcessingProcessor initialized - listening for jobs on scan queue");
   }
 
   @JobHandler(processBallotJob)

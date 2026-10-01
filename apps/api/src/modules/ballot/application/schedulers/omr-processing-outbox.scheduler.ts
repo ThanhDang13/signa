@@ -2,7 +2,6 @@ import { Injectable, Logger } from "@nestjs/common";
 import { Inject } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { QueuePublisher } from "@signa/nest-queue";
-import { S3_SERVICE, type S3Service } from "@signa/nest-s3";
 import { processBallotJob } from "@signa/contracts-queue/scanning";
 import {
   OMR_PROCESSING_OUTBOX_REPOSITORY,
@@ -12,17 +11,11 @@ import {
   BALLOT_REPOSITORY,
   type BallotRepository
 } from "@signa/api/modules/ballot/application/ports";
-import {
-  BALLOT_SCAN_RESULT_REPOSITORY,
-  type BallotScanResultRepository
-} from "@signa/api/modules/ballot/application/ports";
 import { createBallotNotFoundError } from "@signa/api/modules/ballot/application/errors";
-import { BallotResultValidator } from "@signa/api/modules/ballot/application/services/ballot-result-validator";
-import { BallotScanResult } from "@signa/api/modules/ballot/domain/entities";
 
 const BATCH_SIZE = 10;
 const MAX_ATTEMPTS = 3;
-const S3_URL_EXPIRY = 7 * 24 * 60 * 60; // 7 days in seconds
+const PROCESSING_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
 @Injectable()
 export class OmrProcessingOutboxScheduler {
@@ -33,28 +26,27 @@ export class OmrProcessingOutboxScheduler {
     private readonly outboxRepo: OmrProcessingOutboxRepository,
     @Inject(BALLOT_REPOSITORY)
     private readonly ballotRepo: BallotRepository,
-    @Inject(BALLOT_SCAN_RESULT_REPOSITORY)
-    private readonly resultRepo: BallotScanResultRepository,
-    private readonly queuePublisher: QueuePublisher,
-    private readonly validator: BallotResultValidator,
-    @Inject(S3_SERVICE)
-    private readonly s3Service: S3Service
+    private readonly queuePublisher: QueuePublisher
   ) {}
 
   @Cron(CronExpression.EVERY_5_SECONDS)
-  async processPendingRequests() {
+  async publishPending() {
     const requests = await this.outboxRepo.findPending(BATCH_SIZE);
 
     for (const request of requests) {
+      // Check if request can retry
       if (!request.canRetry(MAX_ATTEMPTS)) {
         request.markAsFailed("Max attempts exceeded");
         await this.outboxRepo.update(request);
+        this.logger.warn(`Request ${request.id} exceeded max attempts`);
         continue;
       }
 
       try {
+        // Mark as processing and increment attempts
         request.markAsProcessing();
         request.incrementAttempts();
+        request.generateDispatchId();
         await this.outboxRepo.update(request);
 
         // Fetch ballot to get layout metadata
@@ -63,120 +55,69 @@ export class OmrProcessingOutboxScheduler {
           throw createBallotNotFoundError();
         }
 
-        // Publish to scan queue with layout data
-        await this.queuePublisher
-          .publish(processBallotJob, {
+        // Publish to scan queue with dispatchId as jobId
+        await this.queuePublisher.publish(
+          processBallotJob,
+          {
+            requestId: request.id,
             s3Key: request.s3Key,
             ballotId: request.ballotId,
             layout: ballot.layoutMetadata
-          })
-          .then((result) =>
-            result
-              .onCompleted(async (data) => {
-                try {
-                  await this.handleJobCompletion(request, data);
-                } catch (error) {
-                  const errorMessage = error instanceof Error ? error.message : String(error);
-                  request.markAsFailed(errorMessage);
-                  await this.outboxRepo.update(request);
-                  this.logger.error(
-                    `Failed to process OMR result for ballot ${request.ballotId}: ${errorMessage}`
-                  );
-                }
-              })
-              .onFailed(async (error) => {
-                request.markAsFailed(error.message);
-                await this.outboxRepo.update(request);
-                this.logger.error(
-                  `OMR processing for ballot ${request.ballotId} failed: ${error.message}`
-                );
-              })
-          );
+          },
+          {
+            jobId: request.dispatchId!,
+            attempts: 1 // Retry controlled by outbox, not BullMQ
+          }
+        );
 
-        this.logger.log(`Published scan job for ballot ${request.ballotId}`);
+        this.logger.log(
+          `Published scan job requestId=${request.id} attempt=${request.attempts} dispatchId=${request.dispatchId}`
+        );
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         request.markAsFailed(errorMessage);
         await this.outboxRepo.update(request);
+        this.logger.error(`Failed to publish request ${request.id}: ${errorMessage}`);
       }
     }
   }
 
   /**
-   * Poll for completed jobs and process their results
-   * This handles jobs that completed while the scheduler was down
+   * Recover stuck requests that have been processing for too long
+   * Resets them to pending for retry
    */
-  @Cron(CronExpression.EVERY_5_SECONDS)
-  async processCompletedJobs() {
-    // Find all processing requests
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  async recoverStuck() {
     const processingRequests = await this.outboxRepo.findProcessing(BATCH_SIZE);
+    const now = new Date();
+
+    let recoveredCount = 0;
 
     for (const request of processingRequests) {
-      try {
-        // Check if a result already exists for this request (job completed while we were down)
-        const existingResult = await this.resultRepo.findByRequestId(request.id);
+      if (!request.processingStartedAt) {
+        // Missing processingStartedAt (should not happen), treat as stuck
+        request.status = "pending";
+        await this.outboxRepo.update(request);
+        recoveredCount++;
+        continue;
+      }
 
-        if (existingResult) {
-          // Result exists, mark outbox as completed
-          request.markAsCompleted();
-          await this.outboxRepo.update(request);
-          this.logger.log(`Found orphaned result for request ${request.id}, marked as completed`);
-        }
-      } catch (error) {
-        this.logger.error(`Error checking completed job for request ${request.id}:`, error);
+      const processingTime = now.getTime() - request.processingStartedAt.getTime();
+
+      if (processingTime > PROCESSING_TIMEOUT_MS) {
+        this.logger.warn(
+          `Request ${request.id} stuck in processing for ${Math.round(processingTime / 1000)}s, resetting to pending`
+        );
+
+        request.status = "pending";
+        request.lastError = `Processing timeout after ${Math.round(processingTime / 1000)}s`;
+        await this.outboxRepo.update(request);
+        recoveredCount++;
       }
     }
-  }
 
-  /**
-   * Shared logic for handling job completion
-   * Used by both callbacks and recovery logic
-   */
-  private async handleJobCompletion(request: any, data: any) {
-    // 1. Reload ballot (may have changed)
-    const currentBallot = await this.ballotRepo.findById(request.ballotId);
-    if (!currentBallot) {
-      throw createBallotNotFoundError();
+    if (recoveredCount > 0) {
+      this.logger.log(`Recovered ${recoveredCount} stuck requests`);
     }
-
-    // 2. Validate worker result against ballot's immutable layout
-    const validationResult = this.validator.validate(
-      data.qrVerified,
-      data.selections,
-      currentBallot.layoutMetadata,
-      data.processingMetadata
-    );
-
-    // 3. Create and save scan result
-    const scanResult = BallotScanResult.create({
-      requestId: request.id,
-      ballotId: request.ballotId,
-      userId: request.userId,
-      s3Key: request.s3Key,
-      selections: data.selections,
-      qrVerified: data.qrVerified,
-      processingMetadata: data.processingMetadata,
-      validationStatus: validationResult.status,
-      validationErrors: validationResult.errors.length > 0 ? validationResult.errors : undefined
-    });
-
-    await this.resultRepo.save(scanResult);
-
-    // 4. If valid, mark ballot as voted
-    if (validationResult.isValid && !currentBallot.isVoted()) {
-      currentBallot.markAsVoted();
-      await this.ballotRepo.update(currentBallot);
-      this.logger.log(`Ballot ${request.ballotId} marked as voted`);
-    } else if (!validationResult.isValid) {
-      this.logger.warn(
-        `Ballot ${request.ballotId} scan validation failed: ${validationResult.status}`,
-        validationResult.errors
-      );
-    }
-
-    // 5. Mark request as completed
-    request.markAsCompleted();
-    await this.outboxRepo.update(request);
-    this.logger.log(`OMR processing for ballot ${request.ballotId} completed`);
   }
 }

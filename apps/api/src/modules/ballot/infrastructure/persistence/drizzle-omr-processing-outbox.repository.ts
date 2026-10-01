@@ -21,8 +21,10 @@ export class DrizzleOmrProcessingOutboxRepository implements OmrProcessingOutbox
       s3Key: request.s3Key,
       status: request.status,
       attempts: request.attempts,
+      dispatchId: request.dispatchId,
       lastError: request.lastError,
       processedAt: request.processedAt?.toISOString(),
+      processingStartedAt: request.processingStartedAt?.toISOString(),
       createdAt: request.createdAt.toISOString(),
       updatedAt: request.updatedAt.toISOString()
     });
@@ -43,8 +45,10 @@ export class DrizzleOmrProcessingOutboxRepository implements OmrProcessingOutbox
         s3Key: row.s3Key,
         status: row.status as any,
         attempts: row.attempts,
+        dispatchId: row.dispatchId ?? undefined,
         lastError: row.lastError ?? undefined,
         processedAt: row.processedAt ?? undefined,
+        processingStartedAt: row.processingStartedAt ?? undefined,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt
       })
@@ -66,8 +70,10 @@ export class DrizzleOmrProcessingOutboxRepository implements OmrProcessingOutbox
         s3Key: row.s3Key,
         status: row.status as any,
         attempts: row.attempts,
+        dispatchId: row.dispatchId ?? undefined,
         lastError: row.lastError ?? undefined,
         processedAt: row.processedAt ?? undefined,
+        processingStartedAt: row.processingStartedAt ?? undefined,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt
       })
@@ -81,8 +87,10 @@ export class DrizzleOmrProcessingOutboxRepository implements OmrProcessingOutbox
         s3Key: request.s3Key,
         status: request.status,
         attempts: request.attempts,
+        dispatchId: request.dispatchId,
         lastError: request.lastError,
         processedAt: request.processedAt?.toISOString(),
+        processingStartedAt: request.processingStartedAt?.toISOString(),
         updatedAt: request.updatedAt.toISOString()
       })
       .where(eq(schemas.omrProcessingOutbox.id, request.id));
@@ -105,8 +113,10 @@ export class DrizzleOmrProcessingOutboxRepository implements OmrProcessingOutbox
       s3Key: row.s3Key,
       status: row.status as any,
       attempts: row.attempts,
+      dispatchId: row.dispatchId ?? undefined,
       lastError: row.lastError ?? undefined,
       processedAt: row.processedAt ?? undefined,
+      processingStartedAt: row.processingStartedAt ?? undefined,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt
     });
@@ -130,8 +140,10 @@ export class DrizzleOmrProcessingOutboxRepository implements OmrProcessingOutbox
       s3Key: row.s3Key,
       status: row.status as any,
       attempts: row.attempts,
+      dispatchId: row.dispatchId ?? undefined,
       lastError: row.lastError ?? undefined,
       processedAt: row.processedAt ?? undefined,
+      processingStartedAt: row.processingStartedAt ?? undefined,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt
     });
@@ -154,8 +166,10 @@ export class DrizzleOmrProcessingOutboxRepository implements OmrProcessingOutbox
       s3Key: row.s3Key,
       status: row.status as any,
       attempts: row.attempts,
+      dispatchId: row.dispatchId ?? undefined,
       lastError: row.lastError ?? undefined,
       processedAt: row.processedAt ?? undefined,
+      processingStartedAt: row.processingStartedAt ?? undefined,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt
     });
@@ -178,8 +192,10 @@ export class DrizzleOmrProcessingOutboxRepository implements OmrProcessingOutbox
         s3Key: row.s3Key,
         status: row.status as any,
         attempts: row.attempts,
+        dispatchId: row.dispatchId ?? undefined,
         lastError: row.lastError ?? undefined,
         processedAt: row.processedAt ?? undefined,
+        processingStartedAt: row.processingStartedAt ?? undefined,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt
       })

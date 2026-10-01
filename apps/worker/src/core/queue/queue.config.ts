@@ -17,6 +17,10 @@ export class QueueConfigService implements NestQueueOptionsFactory {
         port: this.config.redis.port,
         password: this.config.redis.password,
         db: this.config.redis.db
+      },
+      workerOptions: {
+        drainDelay: 500, // Poll every 500ms instead of default 5000ms
+        concurrency: 1
       }
     };
   }

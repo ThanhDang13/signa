@@ -10,6 +10,7 @@ export const processBallotJob = defineJob({
   queue: "scan",
   job: "process-ballot",
   data: z.object({
+    requestId: z.string().uuid(),
     s3Key: z.string(),
     ballotId: z.string().uuid(),
     layout: ballotLayoutSchema

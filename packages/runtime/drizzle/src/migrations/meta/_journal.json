@@ -57,6 +57,20 @@
       "when": 1790545939746,
       "tag": "0007_pale_blur",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790883377436,
+      "tag": "0008_whole_martin_li",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790891815667,
+      "tag": "0009_easy_solo",
+      "breakpoints": true
     }
   ]
 }

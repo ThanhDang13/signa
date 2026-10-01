@@ -9,6 +9,7 @@ import { DrizzleBallotScanResultRepository } from "@signa/api/modules/ballot/inf
 import { BallotGenerationOutboxScheduler } from "@signa/api/modules/ballot/application/schedulers/outbox.scheduler";
 import { OmrProcessingOutboxScheduler } from "@signa/api/modules/ballot/application/schedulers/omr-processing-outbox.scheduler";
 import { BallotResultValidator } from "@signa/api/modules/ballot/application/services/ballot-result-validator";
+import { OmrScanResultHandler } from "@signa/api/modules/ballot/application/handlers/omr-scan-result.handler";
 import {
   BALLOT_REPOSITORY,
   BALLOT_GENERATION_OUTBOX_REPOSITORY,
@@ -50,7 +51,8 @@ const queryHandlers = Object.values(QueryHandlers);
     createQueuePublisher(["ballot-generation", "scan"]),
     BallotGenerationOutboxScheduler,
     OmrProcessingOutboxScheduler,
-    BallotResultValidator
+    BallotResultValidator,
+    OmrScanResultHandler
   ],
   exports: [BALLOT_REPOSITORY]
 })

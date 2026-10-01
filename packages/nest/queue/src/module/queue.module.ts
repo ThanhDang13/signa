@@ -1,5 +1,6 @@
 import { Module, type DynamicModule } from "@nestjs/common";
 import { BullModule } from "@nestjs/bullmq";
+import { DiscoveryModule } from "@nestjs/core";
 
 import {
   NEST_QUEUE_OPTIONS,
@@ -7,6 +8,7 @@ import {
   NestQueueModuleAsyncOptions,
   NestQueueOptionsFactory
 } from "./queue.module-options";
+import { JobResultConsumer } from "../services/job-result-consumer.service";
 
 /**
  * Queue module for BullMQ integration with type-safe queue contracts
@@ -79,9 +81,9 @@ export class QueueModule {
 
     return {
       module: QueueModule,
-      imports: [bullModule, ...(options.imports ?? [])],
-      providers: [options.useClass, optionsProvider],
-      exports: [BullModule, NEST_QUEUE_OPTIONS]
+      imports: [DiscoveryModule, bullModule, ...(options.imports ?? [])],
+      providers: [options.useClass, optionsProvider, JobResultConsumer],
+      exports: [BullModule, NEST_QUEUE_OPTIONS, JobResultConsumer]
     };
   }
 
