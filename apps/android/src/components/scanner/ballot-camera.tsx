@@ -415,23 +415,26 @@ export function BallotCamera({ onCapture, onClose, expectedBallotId }: BallotCam
       hasCamera: !!cameraRef.current,
       isProcessing,
       hasLayout,
+      barcodeScanningEnabled,
     });
     if (!cameraRef.current || isProcessing || !hasLayout) return;
     lastQrDetection.current = { fingerprint: "", timestamp: 0 };
     lastFrameFingerprint.current = "";
 
-    // Disable barcode scanning before taking picture
-    setBarcodeScanningEnabled(false);
     setIsProcessing(true);
 
-    // Small delay to ensure barcode scanning is fully disabled
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Disable barcode scanning first to free up the camera
+    setBarcodeScanningEnabled(false);
+
+    // Wait a moment for barcode scanning to fully stop
+    // This prevents ERR_IMAGE_CAPTURE_FAILED
+    await new Promise(resolve => setTimeout(resolve, 150));
 
     try {
-      console.log("Attempting to take picture...");
+      console.log("Attempting to take picture with barcode scanning enabled:", barcodeScanningEnabled);
+      // Take picture with minimal options
       const photo = await cameraRef.current.takePictureAsync({
         quality: 1,
-        skipProcessing: false,
       });
 
       console.log("Picture taken:", photo);
@@ -482,6 +485,13 @@ export function BallotCamera({ onCapture, onClose, expectedBallotId }: BallotCam
       onCapture(croppedResult.uri, qrResult, quality);
     } catch (error) {
       console.error("Failed to take picture:", error);
+      console.error("Error details:", JSON.stringify(error, null, 2));
+      toast({
+        title: "Không thể chụp ảnh",
+        description: "Vui lòng thử lại",
+        variant: "error",
+        icon: AlertCircle,
+      });
       setIsProcessing(false);
       setBarcodeScanningEnabled(true);
     }
@@ -493,6 +503,7 @@ export function BallotCamera({ onCapture, onClose, expectedBallotId }: BallotCam
         ref={cameraRef}
         style={StyleSheet.absoluteFillObject}
         facing={facing}
+        autofocus="on"
         barcodeScannerSettings={
           barcodeScanningEnabled ? { barcodeTypes: ["qr"] } : undefined
         }
