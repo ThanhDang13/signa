@@ -21,7 +21,7 @@ export const ballotKeys = createKeys("ballot", {
   scanRequests: (pageIndex: number, pageSize: number, filter?: FilterType) =>
     ["scan-requests", pageIndex, pageSize, filter] as const,
   scanRequest: (requestId: string) => ["scan-request", requestId] as const,
-  pollScanStatus: (since?: string) => ["poll-scan-status", since] as const
+  pollScanStatus: () => ["poll-scan-status"] as const
 });
 
 export const ballotQueries = {
@@ -53,22 +53,13 @@ export const ballotQueries = {
         return authenticatedClient.call(listScanRequestsContract, {
           query: { pageIndex, pageSize, status }
         });
-      },
-      staleTime: 60_000, // 1 minute - S3 URLs valid for 7 days, no need to regenerate often
-      gcTime: 5 * 60_000, // Keep in cache for 5 minutes
-      refetchInterval: false // Disable auto-refetch, let components control polling
+      }
     }),
 
-  pollScanStatus: (since?: string) =>
+  pollScanStatus: () =>
     queryOptions({
-      queryKey: ballotKeys.pollScanStatus(since),
-      queryFn: () =>
-        authenticatedClient.call(pollScanStatusContract, {
-          query: { since }
-        }),
-      staleTime: 0, // Always fresh for polling
-      gcTime: 0, // Don't cache poll results
-      refetchInterval: false
+      queryKey: ballotKeys.pollScanStatus(),
+      queryFn: () => authenticatedClient.call(pollScanStatusContract, {})
     })
 };
 

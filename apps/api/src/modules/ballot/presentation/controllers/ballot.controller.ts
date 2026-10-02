@@ -56,7 +56,6 @@ import {
   GetScanRequestOutputDto
 } from "@signa/api/modules/ballot/presentation/dto/get-scan-request.dto";
 import {
-  PollScanStatusQueryDto,
   PollScanStatusOutputDto
 } from "@signa/api/modules/ballot/presentation/dto/poll-scan-status.dto";
 import {
@@ -239,11 +238,10 @@ export class BallotController {
   @Protected()
   @Response({ type: PollScanStatusOutputDto })
   @HttpCode(HttpStatus.OK)
-  async pollScanStatus(@Query() query: PollScanStatusQueryDto, @CurrentUser() user: JwtPayload) {
+  async pollScanStatus(@CurrentUser() user: JwtPayload) {
     return this.queryBus.execute(
       new PollScanStatusQuery({
-        userId: user.id,
-        since: query.since
+        userId: user.id
       })
     );
   }

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Link, useRouter, useLocalSearchParams } from "expo-router";
@@ -16,12 +16,7 @@ type ScanRequest = {
   requestId: string;
   status: string;
   validationStatus:
-    | "valid"
-    | "invalid_markers"
-    | "invalid_qr"
-    | "invalid_selections"
-    | "invalid_confidence"
-    | null;
+    "valid" | "invalid_markers" | "invalid_qr" | "invalid_selections" | "invalid_confidence" | null;
   processedAt: string | null;
 };
 
@@ -134,7 +129,6 @@ export default function HistoryScreen() {
   const [filter, setFilter] = useState<FilterType>((filterParam as FilterType) ?? "all");
   const [pageIndex, setPageIndex] = useState(0);
   const [requests, setRequests] = useState<ScanRequest[]>([]);
-  const lastPollTime = useRef<string | undefined>();
 
   const { data, isError, isFetching, isLoading, refetch } = useQuery(
     ballotQueries.listScanRequests(pageIndex, PAGE_SIZE, filter)
@@ -176,7 +170,6 @@ export default function HistoryScreen() {
   const refreshHistory = async () => {
     setRequests([]);
     setPageIndex(0);
-    lastPollTime.current = undefined;
     await queryClient.invalidateQueries({ queryKey: ballotKeys._root });
     await refetch();
   };
@@ -189,26 +182,25 @@ export default function HistoryScreen() {
     setFilter(newFilter);
     setRequests([]);
     setPageIndex(0);
-    lastPollTime.current = undefined;
   };
 
   const filters: FilterType[] = ["all", "valid", "invalid", "pending", "processing"];
 
-  // Lightweight status polling for pending/processing items
-  const hasPendingWork = data?.items.some(
-    (item) => item.status === "pending" || item.status === "processing"
-  );
+  // Lightweight status polling - returns only pending/processing items
   const { data: pollData } = useQuery({
-    ...ballotQueries.pollScanStatus(lastPollTime.current),
-    enabled: !!hasPendingWork,
-    refetchInterval: hasPendingWork ? 5000 : false,
+    ...ballotQueries.pollScanStatus(),
+    enabled: true,
+    refetchInterval: 5000,
+    gcTime: 0
   });
 
-  // If poll detects changes, invalidate current page
-  if (pollData && pollData.items.length > 0) {
-    lastPollTime.current = pollData.serverTime;
-    queryClient.invalidateQueries({ queryKey: ballotKeys.scanRequests(pageIndex, PAGE_SIZE, filter) });
-  }
+  // Refetch when poll data changes and has active items
+  useEffect(() => {
+    if (!pollData) return;
+    queryClient.invalidateQueries({
+      queryKey: ballotKeys.scanRequests(pageIndex, PAGE_SIZE, filter)
+    });
+  }, [pollData, queryClient, pageIndex, filter]);
 
   return (
     <View className="flex-1 bg-background">

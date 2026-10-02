@@ -2,31 +2,27 @@ import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Link, useRouter } from "expo-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef } from "react";
+import { useEffect } from "react";
 import {
   CheckCircle,
   ClipboardList,
   History,
   ScanLine,
   Settings,
-  XCircle,
+  XCircle
 } from "lucide-react-native";
 
 import { Button } from "@signa/android/components/ui/button";
 import { Icon } from "@signa/android/components/ui/icon";
 import { Text } from "@signa/android/components/ui/text";
 import { ballotKeys, ballotQueries } from "@signa/android/lib/tanstack/options/ballot";
+import { useIsFocused } from "@react-navigation/native";
 
 type ScanRequest = {
   requestId: string;
   status: string;
   validationStatus:
-    | "valid"
-    | "invalid_markers"
-    | "invalid_qr"
-    | "invalid_selections"
-    | "invalid_confidence"
-    | null;
+    "valid" | "invalid_markers" | "invalid_qr" | "invalid_selections" | "invalid_confidence" | null;
 };
 
 function ticketId(requestId: string) {
@@ -54,7 +50,7 @@ function errorLabel(request: ScanRequest) {
 function TicketRow({
   request,
   state,
-  isLast,
+  isLast
 }: {
   request: ScanRequest;
   state: "attention" | "processing";
@@ -71,20 +67,14 @@ function TicketRow({
         }`}
       >
         <View
-          className={`h-2.5 w-2.5 rounded-full ${
-            isAttention ? "bg-destructive" : "bg-amber-500"
-          }`}
+          className={`h-2.5 w-2.5 rounded-full ${isAttention ? "bg-destructive" : "bg-amber-500"}`}
         />
         <View className="flex-1">
           <Text className="font-mono text-sm font-semibold text-foreground">
             {ticketId(request.requestId)}
           </Text>
           <Text className="mt-0.5 text-sm text-muted-foreground">
-            {isAttention
-              ? errorLabel(request)
-              : isPending
-                ? "Chờ xử lý"
-                : "Đang xử lý"}
+            {isAttention ? errorLabel(request) : isPending ? "Chờ xử lý" : "Đang xử lý"}
           </Text>
         </View>
       </Pressable>
@@ -99,41 +89,42 @@ function EmptySection({ children }: { children: React.ReactNode }) {
 export default function HomeScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const lastPollTime = useRef<string | undefined>();
 
   // Main query - no polling
-  const { data, isError, isLoading } = useQuery(
-    ballotQueries.listScanRequests(0, 100, "all"),
-  );
+  const { data, isError, isLoading } = useQuery(ballotQueries.listScanRequests(0, 20, "all"));
 
   const requests = data?.items ?? [];
   const successfulRequests = requests.filter(
-    (request) =>
-      request.status === "completed" && request.validationStatus === "valid",
+    (request) => request.status === "completed" && request.validationStatus === "valid"
   );
   const attentionRequests = requests.filter(
     (request) =>
       request.status === "failed" ||
-      (request.status === "completed" && request.validationStatus !== "valid"),
+      (request.status === "completed" && request.validationStatus !== "valid")
   );
   const processingRequests = requests.filter(
-    (request) =>
-      request.status === "pending" || request.status === "processing",
+    (request) => request.status === "pending" || request.status === "processing"
   );
 
-  // Lightweight status polling
-  const hasPendingWork = processingRequests.length > 0;
+  const isFocused = useIsFocused();
+
+  // Lightweight status polling - returns only pending/processing items
   const { data: pollData } = useQuery({
-    ...ballotQueries.pollScanStatus(lastPollTime.current),
-    enabled: hasPendingWork,
-    refetchInterval: hasPendingWork ? 5000 : false,
+    ...ballotQueries.pollScanStatus(),
+    enabled: isFocused,
+    refetchInterval: 5000,
+    refetchIntervalInBackground: false,
+    gcTime: 0
   });
 
-  // If poll detects changes, invalidate main list
-  if (pollData && pollData.items.length > 0) {
-    lastPollTime.current = pollData.serverTime;
-    queryClient.invalidateQueries({ queryKey: ballotKeys.scanRequests(0, 100, "all") });
-  }
+  // Refetch main list when poll data changes and has active items
+  useEffect(() => {
+    if (!pollData) return;
+
+    queryClient.refetchQueries({
+      queryKey: ballotKeys.scanRequests(0, 20, "all")
+    });
+  }, [pollData, queryClient]);
 
   return (
     <View className="flex-1 bg-background">
@@ -147,19 +138,13 @@ export default function HomeScreen() {
         <View className="w-full max-w-md self-center">
           <View className="mb-8 flex-row items-start justify-between gap-4">
             <View className="flex-1">
-              <Text className="text-2xl font-bold text-foreground">
-                Tổng quan
-              </Text>
+              <Text className="text-2xl font-bold text-foreground">Tổng quan</Text>
               <Text className="mt-1 text-sm text-muted-foreground">
                 Theo dõi trạng thái các phiếu đã quét
               </Text>
             </View>
             <Link href="/settings" asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                accessibilityLabel="Mở cài đặt"
-              >
+              <Button variant="ghost" size="icon" accessibilityLabel="Mở cài đặt">
                 <Icon as={Settings} size={20} className="text-foreground" />
               </Button>
             </Link>
@@ -168,43 +153,25 @@ export default function HomeScreen() {
           <View className="mb-6 rounded-lg border border-border bg-card">
             <View className="flex-row">
               <View className="flex-1 items-center border-r border-border px-2 py-4">
-                <Icon
-                  as={ClipboardList}
-                  size={19}
-                  className="mb-2 text-muted-foreground"
-                />
+                <Icon as={ClipboardList} size={19} className="mb-2 text-muted-foreground" />
                 <Text className="text-2xl font-bold text-foreground">
                   {isLoading ? "—" : (data?.total ?? 0)}
                 </Text>
-                <Text className="mt-1 text-xs text-muted-foreground">
-                  Tổng phiếu
-                </Text>
+                <Text className="mt-1 text-xs text-muted-foreground">Tổng phiếu</Text>
               </View>
               <View className="flex-1 items-center border-r border-border px-2 py-4">
-                <Icon
-                  as={CheckCircle}
-                  size={19}
-                  className="mb-2 text-emerald-600"
-                />
+                <Icon as={CheckCircle} size={19} className="mb-2 text-emerald-600" />
                 <Text className="text-2xl font-bold text-emerald-600">
                   {isLoading ? "—" : successfulRequests.length}
                 </Text>
-                <Text className="mt-1 text-xs text-muted-foreground">
-                  Thành công
-                </Text>
+                <Text className="mt-1 text-xs text-muted-foreground">Thành công</Text>
               </View>
               <View className="flex-1 items-center px-2 py-4">
-                <Icon
-                  as={XCircle}
-                  size={19}
-                  className="mb-2 text-destructive"
-                />
+                <Icon as={XCircle} size={19} className="mb-2 text-destructive" />
                 <Text className="text-2xl font-bold text-destructive">
                   {isLoading ? "—" : attentionRequests.length}
                 </Text>
-                <Text className="mt-1 text-xs text-muted-foreground">
-                  Cần xử lý
-                </Text>
+                <Text className="mt-1 text-xs text-muted-foreground">Cần xử lý</Text>
               </View>
             </View>
           </View>
@@ -212,26 +179,18 @@ export default function HomeScreen() {
           {isLoading ? (
             <View className="items-center rounded-lg border border-border bg-card py-10">
               <ActivityIndicator />
-              <Text className="mt-3 text-sm text-muted-foreground">
-                Đang tải...
-              </Text>
+              <Text className="mt-3 text-sm text-muted-foreground">Đang tải...</Text>
             </View>
           ) : isError ? (
             <View className="rounded-lg border border-destructive/30 bg-card p-4">
-              <Text className="font-medium text-destructive">
-                Không thể tải dữ liệu
-              </Text>
-              <Text className="mt-1 text-sm text-muted-foreground">
-                Vui lòng thử lại sau.
-              </Text>
+              <Text className="font-medium text-destructive">Không thể tải dữ liệu</Text>
+              <Text className="mt-1 text-sm text-muted-foreground">Vui lòng thử lại sau.</Text>
             </View>
           ) : (
             <>
               <View className="mb-6">
                 <View className="mb-3 flex-row items-center justify-between">
-                  <Text className="text-sm font-medium text-muted-foreground">
-                    CẦN XỬ LÝ
-                  </Text>
+                  <Text className="text-sm font-medium text-muted-foreground">CẦN XỬ LÝ</Text>
                   {attentionRequests.length > 3 && (
                     <Button
                       variant="ghost"
@@ -264,9 +223,7 @@ export default function HomeScreen() {
 
               <View className="mb-6">
                 <View className="mb-3 flex-row items-center justify-between">
-                  <Text className="text-sm font-medium text-muted-foreground">
-                    ĐANG XỬ LÝ
-                  </Text>
+                  <Text className="text-sm font-medium text-muted-foreground">ĐANG XỬ LÝ</Text>
                   {processingRequests.length > 1 && (
                     <Button
                       variant="ghost"
@@ -281,11 +238,7 @@ export default function HomeScreen() {
                 </View>
                 <View className="rounded-lg border border-border bg-card">
                   {processingRequests.length > 0 ? (
-                    <TicketRow
-                      request={processingRequests[0]}
-                      state="processing"
-                      isLast
-                    />
+                    <TicketRow request={processingRequests[0]} state="processing" isLast />
                   ) : (
                     <EmptySection>Không có phiếu đang chờ.</EmptySection>
                   )}

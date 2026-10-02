@@ -169,7 +169,7 @@ export default function ScanDetailScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { requestId } = useLocalSearchParams<{ requestId: string }>();
-  const lastPollTime = useRef<string | undefined>();
+  const wasInPreviousPoll = useRef(false);
 
   const { data, isError, isLoading } = useQuery(
     ballotQueries.getScanRequest(requestId || ""),
@@ -177,22 +177,28 @@ export default function ScanDetailScreen() {
 
   const shouldPoll = data?.status === "pending" || data?.status === "processing";
 
-  // Lightweight status polling
+  // Lightweight status polling - returns only pending/processing items
   const { data: pollData } = useQuery({
-    ...ballotQueries.pollScanStatus(lastPollTime.current),
+    ...ballotQueries.pollScanStatus(),
     enabled: shouldPoll,
     refetchInterval: shouldPoll ? 5000 : false,
+    gcTime: 0
   });
 
-  // If poll detects this request changed, invalidate detail query
+  // Refetch if request is in poll, or if it just disappeared (finished processing)
   useEffect(() => {
     if (!pollData || !requestId) return;
 
-    const changed = pollData.items.find((item) => item.requestId === requestId);
-    if (changed) {
-      lastPollTime.current = pollData.serverTime;
+    const isInCurrentPoll = pollData.items.some((item) => item.requestId === requestId);
+
+    // Refetch if:
+    // 1. This request is currently in the poll (status changed while still pending/processing)
+    // 2. OR it was in previous poll but not anymore (just finished processing)
+    if (isInCurrentPoll || wasInPreviousPoll.current) {
       queryClient.invalidateQueries({ queryKey: ballotKeys.scanRequest(requestId) });
     }
+
+    wasInPreviousPoll.current = isInCurrentPoll;
   }, [pollData, requestId, queryClient]);
 
   if (isLoading) {
