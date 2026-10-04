@@ -6,7 +6,7 @@ import * as SecureStore from "expo-secure-store";
 export function createApiClient(token: string) {
   return createClient({
     adapter: fetchAdapter,
-    baseUrl: env.API_URL,
+    baseUrl: env.EXPO_PUBLIC_API_URL,
     getHeaders: () => ({ Authorization: `Bearer ${token}` }),
     onError: (status, data) => {
       throw { status, error: data };
@@ -16,7 +16,7 @@ export function createApiClient(token: string) {
 
 export const publicClient = createClient({
   adapter: fetchAdapter,
-  baseUrl: env.API_URL,
+  baseUrl: env.EXPO_PUBLIC_API_URL,
   onError: (status, data) => {
     throw { status, error: data };
   }
@@ -24,7 +24,7 @@ export const publicClient = createClient({
 
 export const authenticatedClient = createClient({
   adapter: fetchAdapter,
-  baseUrl: env.API_URL,
+  baseUrl: env.EXPO_PUBLIC_API_URL,
   getHeaders: async () => {
     // Read directly from SecureStore instead of using the atom store
     const tokensJson = await SecureStore.getItemAsync("auth-tokens");

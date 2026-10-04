@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const envSchema = z.object({
-  API_URL: z.string().url().default("http://localhost:3000/api")
+  EXPO_PUBLIC_API_URL: z.string().url().default("https://sk03.id.vn/api")
 });
 
 const env = envSchema.parse(process.env);

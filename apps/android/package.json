@@ -64,5 +64,9 @@
       "@types/react-dom": "~18.3.0",
       "react-native-css-interop": "0.2.7"
     }
+  },
+  "scripts": {
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   }
 }
