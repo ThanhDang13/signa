@@ -1,0 +1,33 @@
+{
+  "name": "@signa/web",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@signa/react-ui": "workspace:*",
+    "@signa/runtime-fetch-client": "workspace:*",
+    "@signa/dsl-http-client": "workspace:*",
+    "@signa/contracts-http": "workspace:*",
+    "@tanstack/react-form": "^1.33.0",
+    "@tanstack/react-query": "^5.101.0",
+    "@tanstack/react-query-devtools": "^5.101.0",
+    "@tanstack/react-router": "^1.170.15",
+    "@tanstack/react-start": "^1.168.25",
+    "@tanstack/react-table": "^8.21.3",
+    "date-fns": "^4.4.0",
+    "immer": "^11.1.15",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "sonner": "^2.0.7",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "@tanstack/eslint-plugin-query": "^4.44.0",
+    "@types/node": "20.19.9",
+    "@types/react": "^19.2.16",
+    "@types/react-dom": "^19.2.3",
+    "tailwindcss": "^4.3.0",
+    "vite-tsconfig-paths": "^6.1.1"
+  }
+}

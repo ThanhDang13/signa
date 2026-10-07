@@ -1,4 +1,5 @@
 import { Injectable, Logger, Inject } from "@nestjs/common";
+import { QueryBus } from "@nestjs/cqrs";
 import { OnJobResult } from "@signa/nest-queue";
 import { processBallotJob } from "@signa/contracts-queue/scanning";
 import type { JobResult } from "@signa/contracts-queue";
@@ -14,6 +15,7 @@ import {
 import { BallotResultValidator } from "@signa/api/modules/ballot/application/services/ballot-result-validator";
 import { BallotScanResult } from "@signa/api/modules/ballot/domain/entities";
 import { createBallotNotFoundError } from "@signa/api/modules/ballot/application/errors";
+import { GetElectionStatusQuery } from "@signa/api/modules/election/application/queries";
 
 /**
  * Handler for OMR processing job results
@@ -30,7 +32,8 @@ export class OmrScanResultHandler {
     private readonly ballotRepo: BallotRepository,
     @Inject(BALLOT_SCAN_RESULT_REPOSITORY)
     private readonly resultRepo: BallotScanResultRepository,
-    private readonly validator: BallotResultValidator
+    private readonly validator: BallotResultValidator,
+    private readonly queryBus: QueryBus
   ) {}
 
   @OnJobResult(processBallotJob)
@@ -120,11 +123,41 @@ export class OmrScanResultHandler {
 
       await this.resultRepo.save(scanResult);
 
-      // If valid, mark ballot as voted
+      // If valid, check election is still active before marking ballot as voted
       if (validationResult.isValid && !currentBallot.isVoted()) {
-        currentBallot.markAsVoted();
-        await this.ballotRepo.update(currentBallot);
-        this.logger.log(`Ballot ${request.ballotId} marked as voted`);
+        // Re-check election status (race condition: election may have closed during processing)
+        const election = await this.queryBus.execute(
+          new GetElectionStatusQuery({ electionId: currentBallot.electionId })
+        );
+
+        if (election.isActive) {
+          currentBallot.markAsVoted();
+          await this.ballotRepo.update(currentBallot);
+          this.logger.log(`Ballot ${request.ballotId} marked as voted`);
+        } else {
+          // Election closed during processing - create new scan result with rejection status
+          this.logger.warn(
+            `Ballot ${request.ballotId} scan rejected: election is no longer active (status: ${election.status})`
+          );
+
+          // Delete the valid result we just saved
+          await this.resultRepo.deleteByRequestId(result.requestId);
+
+          // Create and save a new result with rejected status
+          const rejectedResult = BallotScanResult.create({
+            requestId: result.requestId,
+            ballotId: request.ballotId,
+            userId: request.userId,
+            s3Key: request.s3Key,
+            selections: result.data!.selections,
+            qrVerified: result.data!.qrVerified,
+            processingMetadata: result.data!.processingMetadata,
+            validationStatus: "rejected_election_closed",
+            validationErrors: [{ reason: "Election is no longer active" }]
+          });
+
+          await this.resultRepo.save(rejectedResult);
+        }
       } else if (!validationResult.isValid) {
         this.logger.warn(
           `Ballot ${request.ballotId} scan validation failed: ${validationResult.status}`,

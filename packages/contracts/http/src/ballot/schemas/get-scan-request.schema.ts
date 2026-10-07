@@ -19,7 +19,8 @@ export const getScanRequestResponseSchema = z.object({
         "invalid_markers",
         "invalid_qr",
         "invalid_selections",
-        "invalid_confidence"
+        "invalid_confidence",
+        "rejected_election_closed"
       ]),
       qrVerified: z.boolean(),
       selections: z.array(

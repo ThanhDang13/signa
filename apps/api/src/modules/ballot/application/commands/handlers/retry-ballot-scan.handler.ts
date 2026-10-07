@@ -1,5 +1,6 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
+import { QueryBus } from "@nestjs/cqrs";
 import { RetryBallotScanCommand } from "@signa/api/modules/ballot/application/commands";
 import {
   BALLOT_REPOSITORY,
@@ -17,8 +18,11 @@ import {
   createScanRequestNotFoundError,
   createScanRequestForbiddenError,
   createRetryNotAllowedError,
-  createBallotAlreadyVotedError
+  createBallotAlreadyVotedError,
+  createBallotNotFoundError
 } from "@signa/api/modules/ballot/application/errors";
+import { GetElectionStatusQuery } from "@signa/api/modules/election/application/queries";
+import { createElectionNotActiveError } from "@signa/api/modules/election/application/errors";
 
 @CommandHandler(RetryBallotScanCommand)
 export class RetryBallotScanHandler implements ICommandHandler<RetryBallotScanCommand> {
@@ -28,7 +32,8 @@ export class RetryBallotScanHandler implements ICommandHandler<RetryBallotScanCo
     @Inject(BALLOT_REPOSITORY)
     private readonly ballotRepo: BallotRepository,
     @Inject(BALLOT_SCAN_RESULT_REPOSITORY)
-    private readonly resultRepo: BallotScanResultRepository
+    private readonly resultRepo: BallotScanResultRepository,
+    private readonly queryBus: QueryBus
   ) {}
 
   async execute(command: RetryBallotScanCommand) {
@@ -51,13 +56,26 @@ export class RetryBallotScanHandler implements ICommandHandler<RetryBallotScanCo
       throw createRetryNotAllowedError();
     }
 
-    // 4. Verify ballot hasn't been voted in the meantime
+    // 4. Verify ballot exists and hasn't been voted
     const ballot = await this.ballotRepo.findById(request.ballotId);
-    if (ballot?.isVoted()) {
+    if (!ballot) {
+      throw createBallotNotFoundError();
+    }
+
+    if (ballot.isVoted()) {
       throw createBallotAlreadyVotedError();
     }
 
-    // 5. Delete old result if exists (for retry idempotency)
+    // 5. Check election status - only allow retry for active elections
+    const election = await this.queryBus.execute(
+      new GetElectionStatusQuery({ electionId: ballot.electionId })
+    );
+
+    if (!election.isActive) {
+      throw createElectionNotActiveError();
+    }
+
+    // 6. Delete old result if exists (for retry idempotency)
     await this.resultRepo.deleteByRequestId(requestId);
 
     // 6. Reset request for retry with new S3 key

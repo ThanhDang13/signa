@@ -14,6 +14,6 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   avatar: text("avatar").notNull().default(""),
   bio: text("bio").notNull().default(""),
-  role: roleEnum("role").notNull().default(ROLES.USER).$type<Role>(),
+  role: roleEnum("role").notNull().default(ROLES.CLERK).$type<Role>(),
   ...timestamps
 });

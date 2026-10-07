@@ -1,9 +1,12 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
+import { QueryBus } from "@nestjs/cqrs";
 import { GetUploadUrlCommand } from "../get-upload-url.command";
 import { S3_SERVICE, type S3Service } from "@signa/nest-s3";
 import { BALLOT_REPOSITORY, type BallotRepository } from "../../ports";
 import { createBallotNotFoundError } from "../../errors";
+import { GetElectionStatusQuery } from "@signa/api/modules/election/application/queries";
+import { createElectionNotActiveError } from "@signa/api/modules/election/application/errors";
 
 @CommandHandler(GetUploadUrlCommand)
 export class GetUploadUrlHandler implements ICommandHandler<GetUploadUrlCommand> {
@@ -11,7 +14,8 @@ export class GetUploadUrlHandler implements ICommandHandler<GetUploadUrlCommand>
     @Inject(S3_SERVICE)
     private readonly s3: S3Service,
     @Inject(BALLOT_REPOSITORY)
-    private readonly ballotRepo: BallotRepository
+    private readonly ballotRepo: BallotRepository,
+    private readonly queryBus: QueryBus
   ) {}
 
   async execute(command: GetUploadUrlCommand) {
@@ -21,6 +25,15 @@ export class GetUploadUrlHandler implements ICommandHandler<GetUploadUrlCommand>
     const ballot = await this.ballotRepo.findById(ballotId);
     if (!ballot) {
       throw createBallotNotFoundError();
+    }
+
+    // Check election status - only allow upload URL for active elections
+    const election = await this.queryBus.execute(
+      new GetElectionStatusQuery({ electionId: ballot.electionId })
+    );
+
+    if (!election.isActive) {
+      throw createElectionNotActiveError();
     }
 
     // Generate S3 key for the scan

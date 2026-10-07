@@ -9,7 +9,8 @@ import {
   closeElectionContract,
   deleteElectionContract,
   getElectionContract,
-  listElectionsContract
+  listElectionsContract,
+  getElectionResultsContract
 } from "@signa/contracts-http/election";
 import {
   CreateElectionCommand,
@@ -44,6 +45,10 @@ import {
   GetElectionOutputDto
 } from "@signa/api/modules/election/presentation/dto/get-election.dto";
 import {
+  GetElectionResultsParamsDto,
+  GetElectionResultsOutputDto
+} from "@signa/api/modules/election/presentation/dto/get-election-results.dto";
+import {
   ListElectionsQueryDto,
   ListElectionsOutputDto
 } from "@signa/api/modules/election/presentation/dto/list-elections.dto";
@@ -51,6 +56,7 @@ import { Protected } from "@signa/api/core/security/decorator";
 import { CurrentUser, type JwtPayload } from "@signa/nest-jwt";
 import {
   GetElectionByIdQuery,
+  GetElectionResultsQuery,
   ListElectionsQuery
 } from "@signa/api/modules/election/application/queries";
 
@@ -80,6 +86,10 @@ const GetElectionRoute = ContractRoute(getElectionContract, {
 
 const ListElectionsRoute = ContractRoute(listElectionsContract, {
   summary: "List elections with pagination and filters"
+});
+
+const GetElectionResultsRoute = ContractRoute(getElectionResultsContract, {
+  summary: "Get election results and statistics"
 });
 
 @ApiTags("ELECTIONS")
@@ -177,5 +187,13 @@ export class ElectionController {
         createdById: query.createdById
       })
     );
+  }
+
+  @GetElectionResultsRoute
+  @Protected()
+  @Response({ type: GetElectionResultsOutputDto })
+  @HttpCode(HttpStatus.OK)
+  async getResults(@Param() params: GetElectionResultsParamsDto, @CurrentUser() user: JwtPayload) {
+    return this.queryBus.execute(new GetElectionResultsQuery({ id: params.id }));
   }
 }

@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import type { FormField, BallotLayout } from "@signa/shared";
 import type PDFDocument from "pdfkit";
+import { BALLOT_FONT_REGULAR, BALLOT_FONT_BOLD, nfc } from "./ballot-fonts";
 
 /**
  * Service for rendering form fields on PDF ballots
@@ -34,7 +35,7 @@ export class FormFieldRenderingService {
       }
 
       // Draw field label
-      doc.fillColor("black").fontSize(14).font("Helvetica-Bold").text(field.label, leftMargin, startY);
+      doc.fillColor("black").fontSize(14).font(BALLOT_FONT_BOLD).text(nfc(field.label), leftMargin, startY);
       doc.moveDown(0.3);
 
       // Track field layout with validation rules for scan result processing
@@ -92,8 +93,8 @@ export class FormFieldRenderingService {
 
       // Draw option label
       doc.fontSize(12)
-        .font("Helvetica")
-        .text(option, leftMargin + checkboxSize + spacing, currentY);
+        .font(BALLOT_FONT_REGULAR)
+        .text(nfc(option), leftMargin + checkboxSize + spacing, currentY);
 
       doc.moveDown(0.5);
     });
@@ -130,8 +131,8 @@ export class FormFieldRenderingService {
 
       // Draw option label
       doc.fontSize(12)
-        .font("Helvetica")
-        .text(option, leftMargin + radioSize + spacing, currentY);
+        .font(BALLOT_FONT_REGULAR)
+        .text(nfc(option), leftMargin + radioSize + spacing, currentY);
 
       doc.moveDown(0.5);
     });

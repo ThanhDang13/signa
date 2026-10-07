@@ -1,5 +1,7 @@
-import { Injectable, type Provider, OnModuleDestroy } from "@nestjs/common";
-import { Queue, QueueEvents } from "bullmq";
+import type { OnModuleDestroy } from "@nestjs/common";
+import { Injectable, type Provider } from "@nestjs/common";
+import type { Queue } from "bullmq";
+import { QueueEvents } from "bullmq";
 import { getQueueToken } from "@nestjs/bullmq";
 import type { JobContract, InferJobData, InferJobResult } from "@signa/dsl-queue-contract";
 import {

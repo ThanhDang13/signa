@@ -5,7 +5,7 @@ import {
   ELECTION_REPOSITORY,
   type ElectionRepository
 } from "@signa/api/modules/election/application/ports";
-import { createElectionNotFoundError } from "@signa/api/modules/election/application/errors";
+import { createElectionNotFoundError, createElectionNotDraftError } from "@signa/api/modules/election/application/errors";
 
 @CommandHandler(UpdateElectionCommand)
 export class UpdateElectionHandler implements ICommandHandler<UpdateElectionCommand> {
@@ -20,6 +20,10 @@ export class UpdateElectionHandler implements ICommandHandler<UpdateElectionComm
     const election = await this.elections.findById(id);
     if (!election) {
       throw createElectionNotFoundError();
+    }
+
+    if (!election.canEdit()) {
+      throw createElectionNotDraftError();
     }
 
     if (title || description !== undefined || formStructure) {

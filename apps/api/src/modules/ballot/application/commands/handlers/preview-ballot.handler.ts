@@ -1,5 +1,6 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { Inject, Injectable } from "@nestjs/common";
+import { QueryBus } from "@nestjs/cqrs";
 import { PreviewBallotCommand } from "@signa/api/modules/ballot/application/commands";
 import { QueuePublisher } from "@signa/nest-queue";
 import { generateBallotJob } from "@signa/contracts-queue/ballot";
@@ -9,11 +10,14 @@ import { createHmac } from "crypto";
 import { InjectConfig } from "@signa/nest-config";
 import { APP_CONFIG, type AppConfig } from "@signa/api/core/config/tokens";
 import { BallotId } from "@signa/api/modules/ballot/domain/value-objects";
+import { GetElectionStatusQuery } from "@signa/api/modules/election/application/queries";
+import { createElectionNotDraftError } from "@signa/api/modules/election/application/errors";
 
 @CommandHandler(PreviewBallotCommand)
 export class PreviewBallotHandler implements ICommandHandler<PreviewBallotCommand> {
   constructor(
     private readonly queuePublisher: QueuePublisher,
+    private readonly queryBus: QueryBus,
     @Inject(S3_SERVICE)
     private readonly s3: S3Service,
     @InjectConfig(APP_CONFIG)
@@ -22,6 +26,15 @@ export class PreviewBallotHandler implements ICommandHandler<PreviewBallotComman
 
   async execute(command: PreviewBallotCommand) {
     const { electionId, formStructure } = command.payload;
+
+    // Check election status - only allow preview for draft elections
+    const election = await this.queryBus.execute(
+      new GetElectionStatusQuery({ electionId })
+    );
+
+    if (election.status !== "draft") {
+      throw createElectionNotDraftError();
+    }
 
     // Generate a sample ballot ID for preview
     const sampleBallotId = BallotId.create().toString();

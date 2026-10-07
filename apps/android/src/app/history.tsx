@@ -16,7 +16,13 @@ type ScanRequest = {
   requestId: string;
   status: string;
   validationStatus:
-    "valid" | "invalid_markers" | "invalid_qr" | "invalid_selections" | "invalid_confidence" | null;
+    | "valid"
+    | "invalid_markers"
+    | "invalid_qr"
+    | "invalid_selections"
+    | "invalid_confidence"
+    | "rejected_election_closed"
+    | null;
   processedAt: string | null;
 };
 
@@ -80,7 +86,8 @@ function requestState(request: ScanRequest): RequestState {
     invalid_markers: "Lỗi điểm chuẩn",
     invalid_qr: "Lỗi mã QR",
     invalid_selections: "Lỗi lựa chọn",
-    invalid_confidence: "Độ chính xác thấp"
+    invalid_confidence: "Độ chính xác thấp",
+    rejected_election_closed: "Cuộc bầu cử đã đóng"
   } as const;
 
   return {

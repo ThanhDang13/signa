@@ -10,7 +10,7 @@ import {
   type BallotGenerationOutboxRepository
 } from "@signa/api/modules/ballot/application/ports";
 import { BallotGenerationRequest } from "@signa/api/modules/ballot/domain/entities";
-import { createElectionNotFoundError } from "@signa/api/modules/election/application/errors";
+import { createElectionNotFoundError, createElectionNotActiveError } from "@signa/api/modules/election/application/errors";
 import { v7 as uuidv7 } from "uuid";
 
 @CommandHandler(GenerateBallotsCommand)
@@ -28,6 +28,11 @@ export class GenerateBallotsHandler implements ICommandHandler<GenerateBallotsCo
     const election = await this.elections.findById(electionId);
     if (!election) {
       throw createElectionNotFoundError();
+    }
+
+    // Only allow ballot generation for active elections
+    if (!election.isActive()) {
+      throw createElectionNotActiveError();
     }
 
     // Create a single batch request with all ballot IDs

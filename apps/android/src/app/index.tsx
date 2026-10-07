@@ -22,7 +22,13 @@ type ScanRequest = {
   requestId: string;
   status: string;
   validationStatus:
-    "valid" | "invalid_markers" | "invalid_qr" | "invalid_selections" | "invalid_confidence" | null;
+    | "valid"
+    | "invalid_markers"
+    | "invalid_qr"
+    | "invalid_selections"
+    | "invalid_confidence"
+    | "rejected_election_closed"
+    | null;
 };
 
 function ticketId(requestId: string) {
@@ -42,6 +48,8 @@ function errorLabel(request: ScanRequest) {
       return "Lỗi lựa chọn";
     case "invalid_confidence":
       return "Độ chính xác thấp";
+    case "rejected_election_closed":
+      return "Cuộc bầu cử đã đóng";
     default:
       return "Lỗi quét";
   }

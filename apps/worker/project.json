@@ -10,7 +10,13 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "apps/worker/dist",
-        "assets": ["apps/worker/src/assets"],
+        "assets": [
+          {
+            "input": "apps/worker/assets",
+            "glob": "**/*",
+            "output": "assets"
+          }
+        ],
         "main": "apps/worker/main.ts",
         "tsConfig": "apps/worker/tsconfig.app.json",
         "swcrc": "apps/worker/.swcrc",

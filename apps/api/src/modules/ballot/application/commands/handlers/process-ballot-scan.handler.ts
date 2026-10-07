@@ -1,5 +1,6 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
+import { QueryBus } from "@nestjs/cqrs";
 import { ProcessBallotScanCommand } from "@signa/api/modules/ballot/application/commands";
 import {
   BALLOT_REPOSITORY,
@@ -16,13 +17,16 @@ import {
   createScanAlreadyActiveError,
   createScanAlreadyTerminalError
 } from "@signa/api/modules/ballot/application/errors";
+import { GetElectionStatusQuery } from "@signa/api/modules/election/application/queries";
+import { createElectionNotActiveError } from "@signa/api/modules/election/application/errors";
 
 @CommandHandler(ProcessBallotScanCommand)
 export class ProcessBallotScanHandler implements ICommandHandler<ProcessBallotScanCommand> {
   constructor(
     @Inject(BALLOT_REPOSITORY) private readonly ballots: BallotRepository,
     @Inject(OMR_PROCESSING_OUTBOX_REPOSITORY)
-    private readonly outboxRepo: OmrProcessingOutboxRepository
+    private readonly outboxRepo: OmrProcessingOutboxRepository,
+    private readonly queryBus: QueryBus
   ) {}
 
   async execute(command: ProcessBallotScanCommand) {
@@ -34,27 +38,41 @@ export class ProcessBallotScanHandler implements ICommandHandler<ProcessBallotSc
       throw createBallotNotFoundError();
     }
 
-    // 2. Reject if ballot already voted
+    // 2. Check election status - only allow scan processing for active elections
+    const election = await this.queryBus.execute(
+      new GetElectionStatusQuery({ electionId: ballot.electionId })
+    );
+
+    if (!election.isActive) {
+      throw createElectionNotActiveError();
+    }
+
+    // 3. Reject if ballot already voted
     if (ballot.isVoted()) {
       throw createBallotAlreadyVotedError();
     }
 
-    // 3. Check for existing scan request by ballot ID (global duplicate check)
+    // 3. Reject if ballot already voted
+    if (ballot.isVoted()) {
+      throw createBallotAlreadyVotedError();
+    }
+
+    // 4. Check for existing scan request by ballot ID (global duplicate check)
     const existingRequest = await this.outboxRepo.findByBallotId(ballotId);
 
     if (existingRequest) {
-      // 3a. Reject if request is active
+      // 4a. Reject if request is active
       if (existingRequest.isActive()) {
         throw createScanAlreadyActiveError();
       }
 
-      // 3b. If terminal, instruct client to retry the existing request
+      // 4b. If terminal, instruct client to retry the existing request
       if (existingRequest.isTerminal()) {
         throw createScanAlreadyTerminalError(existingRequest.id);
       }
     }
 
-    // 4. Create new OMR processing request
+    // 5. Create new OMR processing request
     const request = OmrProcessingRequest.create({
       ballotId,
       userId,

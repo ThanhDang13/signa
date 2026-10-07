@@ -7,7 +7,7 @@ export const createElectionSchema = z.object({
   formStructure: formStructureSchema,
   startDate: z.iso.datetime().optional(),
   endDate: z.iso.datetime().optional(),
-  maxVoters: z.number().int().positive().optional()
+  maxVoters: z.coerce.number().int().positive().optional()
 });
 
 export const createElectionResponseSchema = z.object({

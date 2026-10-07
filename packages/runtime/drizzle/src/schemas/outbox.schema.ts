@@ -14,7 +14,8 @@ export const VALIDATION_STATUSES = [
   "invalid_markers",
   "invalid_qr",
   "invalid_selections",
-  "invalid_confidence"
+  "invalid_confidence",
+  "rejected_election_closed"
 ] as const;
 export type ValidationStatus = (typeof VALIDATION_STATUSES)[number];
 

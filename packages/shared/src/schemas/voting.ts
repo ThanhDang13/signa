@@ -28,7 +28,7 @@ export const formFieldSchema = z.object({
   required: z.boolean(),
   options: z.array(z.string()).optional(),
   position: formFieldPositionSchema,
-  metadata: z.record(z.string(), z.unknown()).optional()
+  metadata: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()])).optional()
 });
 
 export const formLayoutSchema = z.object({

@@ -2,7 +2,12 @@ import { BaseEntity, Accessor } from "@signa/nest-property";
 import { v7 as uuidv7 } from "uuid";
 
 export type ValidationStatus =
-  "valid" | "invalid_markers" | "invalid_qr" | "invalid_selections" | "invalid_confidence";
+  | "valid"
+  | "invalid_markers"
+  | "invalid_qr"
+  | "invalid_selections"
+  | "invalid_confidence"
+  | "rejected_election_closed";
 
 export type ScanSelection = {
   fieldId: string;

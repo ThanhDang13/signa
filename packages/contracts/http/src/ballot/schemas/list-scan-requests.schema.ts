@@ -18,7 +18,8 @@ export const listScanRequestsResponseSchema = z.object({
           "invalid_markers",
           "invalid_qr",
           "invalid_selections",
-          "invalid_confidence"
+          "invalid_confidence",
+          "rejected_election_closed"
         ])
         .nullable(),
       qrVerified: z.boolean().nullable(),

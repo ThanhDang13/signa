@@ -1,0 +1,16 @@
+{
+  "files": [],
+  "include": ["src"],
+  "references": [],
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["dom", "es2018"],
+    "allowJs": false,
+    "moduleResolution": "bundler",
+    "module": "esnext",
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "types": ["vite/client"]
+  }
+}

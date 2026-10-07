@@ -5,7 +5,7 @@ import {
   ELECTION_REPOSITORY,
   type ElectionRepository
 } from "@signa/api/modules/election/application/ports";
-import { createElectionNotFoundError } from "@signa/api/modules/election/application/errors";
+import { createElectionNotFoundError, createElectionCannotBeDeletedError } from "@signa/api/modules/election/application/errors";
 
 @CommandHandler(DeleteElectionCommand)
 export class DeleteElectionHandler implements ICommandHandler<DeleteElectionCommand> {
@@ -19,6 +19,10 @@ export class DeleteElectionHandler implements ICommandHandler<DeleteElectionComm
     const election = await this.elections.findById(id);
     if (!election) {
       throw createElectionNotFoundError();
+    }
+
+    if (!election.canEdit()) {
+      throw createElectionCannotBeDeletedError();
     }
 
     await this.elections.delete(id);

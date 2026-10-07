@@ -31,7 +31,8 @@ type ScanRequestDetail = {
       | "invalid_markers"
       | "invalid_qr"
       | "invalid_selections"
-      | "invalid_confidence";
+      | "invalid_confidence"
+      | "rejected_election_closed";
     qrVerified: boolean;
     selections: Array<{
       fieldId: string;
@@ -115,7 +116,8 @@ function ValidationStatusBadge({
     | "invalid_markers"
     | "invalid_qr"
     | "invalid_selections"
-    | "invalid_confidence";
+    | "invalid_confidence"
+    | "rejected_election_closed";
 }) {
   const config = {
     valid: {
@@ -152,6 +154,13 @@ function ValidationStatusBadge({
       bgColor: "bg-destructive/10",
       textColor: "text-destructive",
       iconColor: "text-destructive",
+    },
+    rejected_election_closed: {
+      label: "Cuộc bầu cử đã đóng",
+      icon: XCircle,
+      bgColor: "bg-amber-500/15",
+      textColor: "text-amber-700 dark:text-amber-400",
+      iconColor: "text-amber-600",
     },
   }[validationStatus];
 

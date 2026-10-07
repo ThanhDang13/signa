@@ -31,7 +31,7 @@ export class SignupHandler implements ICommandHandler<SignupCommand> {
       email: Email.create(email),
       fullname,
       password: await Password.create(password, this.hasher),
-      role: "USER"
+      role: "CLERK"
     });
 
     await this.users.save(user);

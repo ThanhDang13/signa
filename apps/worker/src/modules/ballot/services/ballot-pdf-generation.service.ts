@@ -3,6 +3,7 @@ import type { FormStructure, BallotLayout } from "@signa/shared";
 import PDFDocument from "pdfkit";
 import { ArucoMarkerDrawingService } from "./aruco-marker-drawing.service";
 import { FormFieldRenderingService } from "./form-field-rendering.service";
+import { registerBallotFonts, BALLOT_FONT_REGULAR, BALLOT_FONT_BOLD, nfc } from "./ballot-fonts";
 
 export interface PdfGenerationResult {
   pdfBuffer: Buffer;
@@ -54,16 +55,20 @@ export class BallotPdfGenerationService {
     ballots: Array<{ ballotId: string; qrCodeDataUrl: string }>
   ): Promise<BatchPdfGenerationResult> {
     return new Promise((resolve, reject) => {
-      const chunks: Buffer[] = [];
-      const doc = new PDFDocument({
-        size: "A4",
-        margins: {
-          top: this.formFieldService.mmToPoints(formStructure.layout.margins.top),
-          right: this.formFieldService.mmToPoints(formStructure.layout.margins.right),
-          bottom: this.formFieldService.mmToPoints(formStructure.layout.margins.bottom),
-          left: this.formFieldService.mmToPoints(formStructure.layout.margins.left)
-        }
-      });
+      try {
+        const chunks: Buffer[] = [];
+        const doc = new PDFDocument({
+          size: "A4",
+          margins: {
+            top: this.formFieldService.mmToPoints(formStructure.layout.margins.top),
+            right: this.formFieldService.mmToPoints(formStructure.layout.margins.right),
+            bottom: this.formFieldService.mmToPoints(formStructure.layout.margins.bottom),
+            left: this.formFieldService.mmToPoints(formStructure.layout.margins.left)
+          }
+        });
+
+        // Register custom fonts before any drawing operations
+        registerBallotFonts(doc);
 
       // Track layout metadata for OMR processing (convert points to millimeters)
       const markerSize = this.markerDrawingService.getMarkerSize();
@@ -119,28 +124,28 @@ export class BallotPdfGenerationService {
 
       // Generate each ballot as a page
       ballots.forEach(({ ballotId, qrCodeDataUrl }, index) => {
-        // Add new page for subsequent ballots
-        if (index > 0) {
-          doc.addPage();
-        }
+        try {
+          // Add new page for subsequent ballots
+          if (index > 0) {
+            doc.addPage();
+          }
 
         // FIRST: Draw title and description at the top (before markers/QR)
         // This ensures they're positioned correctly at the page top
-        doc.fontSize(28).font("Helvetica-Bold").text(formStructure.title, {
+        doc.fontSize(28).font(BALLOT_FONT_BOLD).text(nfc(formStructure.title), {
           align: "center"
         });
         doc.moveDown(0.5);
 
         // Draw description if present
         if (formStructure.description) {
-          doc.fontSize(14).font("Helvetica").text(formStructure.description, {
+          doc.fontSize(14).font(BALLOT_FONT_REGULAR).text(nfc(formStructure.description), {
             align: "center"
           });
           doc.moveDown();
         }
 
         // Save the Y position after title/description for content to start
-        const contentStartY = doc.y;
         doc.moveDown(1.5);
 
         // THEN: Draw ArUco markers at corners (these are positioned absolutely)
@@ -166,15 +171,23 @@ export class BallotPdfGenerationService {
         const ballotLayout = { ...layout, fields: [] };
         this.formFieldService.drawFormFields(doc, formStructure.fields, ballotLayout.fields);
 
-        // Store metadata for this ballot
-        result.ballots.push({
-          ballotId,
-          layout: ballotLayout,
-          pageNumber: index + 1
-        });
+          // Store metadata for this ballot
+          result.ballots.push({
+            ballotId,
+            layout: ballotLayout,
+            pageNumber: index + 1
+          });
+        } catch (error) {
+          this.logger.error(`Error generating ballot ${ballotId}:`, error);
+          reject(error);
+        }
       });
 
       doc.end();
+    } catch (error) {
+      this.logger.error("Error in generateBatch:", error);
+      reject(error);
+    }
     });
   }
 
@@ -191,100 +204,12 @@ export class BallotPdfGenerationService {
     ballotId: string,
     qrCodeDataUrl: string
   ): Promise<PdfGenerationResult> {
-    return new Promise((resolve, reject) => {
-      const chunks: Buffer[] = [];
-      const doc = new PDFDocument({
-        size: "A4",
-        margins: {
-          top: this.formFieldService.mmToPoints(formStructure.layout.margins.top),
-          right: this.formFieldService.mmToPoints(formStructure.layout.margins.right),
-          bottom: this.formFieldService.mmToPoints(formStructure.layout.margins.bottom),
-          left: this.formFieldService.mmToPoints(formStructure.layout.margins.left)
-        }
-      });
+    // Delegate to generateBatch with a single ballot
+    const batchResult = await this.generateBatch(formStructure, [{ ballotId, qrCodeDataUrl }]);
 
-      // Track layout metadata for OMR processing (convert points to millimeters)
-      const markerSize = this.markerDrawingService.getMarkerSize();
-      const markerOffset = 20; // Increased offset for proper quiet zone
-      const qrSize = 85; // Balanced size for reliable scanning (30mm ~= 350px at 300 DPI)
-
-      // Position QR code directly below top-right ArUco marker
-      const topRightMarkerX = this.PAGE_WIDTH - markerSize - markerOffset;
-      const qrX = topRightMarkerX + markerSize - qrSize; // Align right edge with marker
-      const qrY = markerOffset + markerSize + 10; // 10pt gap below marker
-
-      const layout: BallotLayout = {
-        pageWidth: this.formFieldService.pointsToMm(this.PAGE_WIDTH),
-        pageHeight: this.formFieldService.pointsToMm(this.PAGE_HEIGHT),
-        markers: {
-          topLeft: {
-            x: this.formFieldService.pointsToMm(markerOffset),
-            y: this.formFieldService.pointsToMm(markerOffset)
-          },
-          topRight: {
-            x: this.formFieldService.pointsToMm(topRightMarkerX),
-            y: this.formFieldService.pointsToMm(markerOffset)
-          },
-          bottomLeft: {
-            x: this.formFieldService.pointsToMm(markerOffset),
-            y: this.formFieldService.pointsToMm(this.PAGE_HEIGHT - markerSize - markerOffset)
-          },
-          bottomRight: {
-            x: this.formFieldService.pointsToMm(this.PAGE_WIDTH - markerSize - markerOffset),
-            y: this.formFieldService.pointsToMm(this.PAGE_HEIGHT - markerSize - markerOffset)
-          }
-        },
-        qrCode: {
-          x: this.formFieldService.pointsToMm(qrX),
-          y: this.formFieldService.pointsToMm(qrY),
-          width: this.formFieldService.pointsToMm(qrSize),
-          height: this.formFieldService.pointsToMm(qrSize)
-        },
-        fields: []
-      };
-
-      doc.on("data", (chunk) => chunks.push(chunk));
-      doc.on("end", () => resolve({ pdfBuffer: Buffer.concat(chunks), layout }));
-      doc.on("error", reject);
-
-      // Draw ArUco markers at corners with proper quiet zones (IDs match scanning expectations)
-      this.markerDrawingService.drawMarkers(doc, [
-        { id: this.MARKER_IDS.TOP_LEFT, x: markerOffset, y: markerOffset },
-        { id: this.MARKER_IDS.TOP_RIGHT, x: topRightMarkerX, y: markerOffset },
-        { id: this.MARKER_IDS.BOTTOM_LEFT, x: markerOffset, y: this.PAGE_HEIGHT - markerSize - markerOffset },
-        {
-          id: this.MARKER_IDS.BOTTOM_RIGHT,
-          x: this.PAGE_WIDTH - markerSize - markerOffset,
-          y: this.PAGE_HEIGHT - markerSize - markerOffset
-        }
-      ]);
-
-      // FIRST: Draw title and description at the top
-      doc.fontSize(28).font("Helvetica-Bold").text(formStructure.title, {
-        align: "center"
-      });
-      doc.moveDown(0.5);
-
-      // Draw description if present
-      if (formStructure.description) {
-        doc.fontSize(14).font("Helvetica").text(formStructure.description, {
-          align: "center"
-        });
-        doc.moveDown();
-      }
-
-      doc.moveDown(1.5);
-
-      // Draw QR code (positioned absolutely, after title so it doesn't interfere)
-      doc.image(qrCodeDataUrl, qrX, qrY, {
-        width: qrSize,
-        height: qrSize
-      });
-
-      // Draw form fields and collect OMR positions
-      this.formFieldService.drawFormFields(doc, formStructure.fields, layout.fields);
-
-      doc.end();
-    });
+    return {
+      pdfBuffer: batchResult.pdfBuffer,
+      layout: batchResult.ballots[0].layout
+    };
   }
 }

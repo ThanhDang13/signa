@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { IdentityController } from "@signa/api/modules/identity/presentation/controllers/identity.controller";
+import { ClerkController } from "@signa/api/modules/identity/presentation/controllers/clerk.controller";
 import { DrizzleUserRepository } from "@signa/api/modules/identity/infrastructure/persistence/drizzle-user.repository";
 import { Argon2PasswordHasher } from "@signa/api/modules/identity/infrastructure/adapters/argon2-password-hasher";
 import { USER_REPOSITORY } from "@signa/api/modules/identity/application/ports";
@@ -11,7 +12,7 @@ const commandHandlers = Object.values(CommandHandlers);
 const queryHandlers = Object.values(QueryHandlers);
 
 @Module({
-  controllers: [IdentityController],
+  controllers: [IdentityController, ClerkController],
   providers: [
     ...commandHandlers,
     ...queryHandlers,
