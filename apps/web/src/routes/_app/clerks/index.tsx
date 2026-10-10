@@ -17,6 +17,7 @@ import {
 } from "@signa/react-ui/components/ui/breadcrumb";
 import { Separator } from "@signa/react-ui/components/ui/separator";
 import { SidebarTrigger } from "@signa/react-ui/components/ui/sidebar";
+import { ScrollArea } from "@signa/react-ui/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
@@ -147,28 +148,30 @@ function RouteComponent() {
           </BreadcrumbList>
         </Breadcrumb>
       </header>
-      <div className="flex-1 p-4">
-        <DataTable
-          columns={columns}
-          data={filteredData}
-          pageCount={data?.meta.totalPages || 0}
-          rowCount={data?.meta.totalCount}
-          isLoading={isLoading}
-          pagination={pagination}
-          onPaginationChange={setPagination}
-          sorting={sorting}
-          onSortingChange={setSorting}
-          columnFilters={columnFilters}
-          onColumnFiltersChange={setColumnFilters}
-          searchableColumns={[
-            {
-              id: "email",
-              title: "Tìm kiếm theo email hoặc họ tên"
-            }
-          ]}
-          toolbarActions={<CreateClerkDialog />}
-        />
-      </div>
+      <ScrollArea className="h-full flex-1">
+        <div className="p-4">
+          <DataTable
+            columns={columns}
+            data={filteredData}
+            pageCount={data?.meta.totalPages || 0}
+            rowCount={data?.meta.totalCount}
+            isLoading={isLoading}
+            pagination={pagination}
+            onPaginationChange={setPagination}
+            sorting={sorting}
+            onSortingChange={setSorting}
+            columnFilters={columnFilters}
+            onColumnFiltersChange={setColumnFilters}
+            searchableColumns={[
+              {
+                id: "email",
+                title: "Tìm kiếm theo email hoặc họ tên"
+              }
+            ]}
+            toolbarActions={<CreateClerkDialog />}
+          />
+        </div>
+      </ScrollArea>
     </div>
   );
 }

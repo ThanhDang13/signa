@@ -1,7 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Trash2, Play, Square, Pencil, BarChart3, X, FileText, Edit, ScanLine } from "lucide-react";
+import {
+  MoreHorizontal,
+  Trash2,
+  Play,
+  Square,
+  Pencil,
+  BarChart3,
+  X,
+  FileText,
+  Edit,
+  ScanLine
+} from "lucide-react";
 import * as React from "react";
 import { z } from "zod";
 import { Link } from "@tanstack/react-router";
@@ -18,6 +29,7 @@ import {
 } from "@signa/react-ui/components/ui/breadcrumb";
 import { Separator } from "@signa/react-ui/components/ui/separator";
 import { SidebarTrigger } from "@signa/react-ui/components/ui/sidebar";
+import { ScrollArea } from "@signa/react-ui/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
@@ -172,7 +184,7 @@ function RouteComponent() {
   ];
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex h-full flex-1 flex-col">
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
@@ -184,53 +196,55 @@ function RouteComponent() {
           </BreadcrumbList>
         </Breadcrumb>
       </header>
-      <div className="flex-1 p-4">
-        <DataTable
-          columns={columns}
-          data={filteredData}
-          pageCount={data?.meta.totalPages || 0}
-          rowCount={data?.meta.totalCount}
-          isLoading={isLoading}
-          pagination={pagination}
-          onPaginationChange={setPagination}
-          sorting={sorting}
-          onSortingChange={setSorting}
-          columnFilters={columnFilters}
-          onColumnFiltersChange={setColumnFilters}
-          searchableColumns={[
-            {
-              id: "title",
-              title: "Tìm kiếm theo tiêu đề hoặc mô tả"
+      <ScrollArea className="h-full flex-1">
+        <div className="p-4">
+          <DataTable
+            columns={columns}
+            data={filteredData}
+            pageCount={data?.meta.totalPages || 0}
+            rowCount={data?.meta.totalCount}
+            isLoading={isLoading}
+            pagination={pagination}
+            onPaginationChange={setPagination}
+            sorting={sorting}
+            onSortingChange={setSorting}
+            columnFilters={columnFilters}
+            onColumnFiltersChange={setColumnFilters}
+            searchableColumns={[
+              {
+                id: "title",
+                title: "Tìm kiếm theo tiêu đề hoặc mô tả"
+              }
+            ]}
+            toolbarActions={
+              <>
+                <Select
+                  value={statusFilter || "all"}
+                  onValueChange={(value) => {
+                    const newFilters = columnFilters.filter((f) => f.id !== "status");
+                    if (value !== "all") {
+                      newFilters.push({ id: "status", value });
+                    }
+                    setColumnFilters(newFilters);
+                  }}
+                >
+                  <SelectTrigger className="h-8 w-[180px]">
+                    <SelectValue placeholder="Trạng thái" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                    <SelectItem value="draft">Nháp</SelectItem>
+                    <SelectItem value="active">Đang diễn ra</SelectItem>
+                    <SelectItem value="closed">Đã đóng</SelectItem>
+                    <SelectItem value="archived">Đã lưu trữ</SelectItem>
+                  </SelectContent>
+                </Select>
+                <CreateElectionDialog />
+              </>
             }
-          ]}
-          toolbarActions={
-            <>
-              <Select
-                value={statusFilter || "all"}
-                onValueChange={(value) => {
-                  const newFilters = columnFilters.filter((f) => f.id !== "status");
-                  if (value !== "all") {
-                    newFilters.push({ id: "status", value });
-                  }
-                  setColumnFilters(newFilters);
-                }}
-              >
-                <SelectTrigger className="h-8 w-[180px]">
-                  <SelectValue placeholder="Trạng thái" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                  <SelectItem value="draft">Nháp</SelectItem>
-                  <SelectItem value="active">Đang diễn ra</SelectItem>
-                  <SelectItem value="closed">Đã đóng</SelectItem>
-                  <SelectItem value="archived">Đã lưu trữ</SelectItem>
-                </SelectContent>
-              </Select>
-              <CreateElectionDialog />
-            </>
-          }
-        />
-      </div>
+          />
+        </div>
+      </ScrollArea>
     </div>
   );
 }
@@ -546,7 +560,7 @@ function ElectionActions({ election }: { election: Election }) {
             </DropdownMenuItem>
           </>
         )}
-        {election.status !== "draft" && (
+        {election.status === "active" && (
           <DropdownMenuItem asChild>
             <Link to="/elections/$id/ballots" params={{ id: election.id }}>
               <FileText className="mr-2 h-4 w-4" />
@@ -554,11 +568,19 @@ function ElectionActions({ election }: { election: Election }) {
             </Link>
           </DropdownMenuItem>
         )}
-        {election.status !== "draft" && (
+        {election.status === "active" && (
           <DropdownMenuItem asChild>
             <Link to="/elections/$id/scans" params={{ id: election.id }}>
               <ScanLine className="mr-2 h-4 w-4" />
               Quản lý quét phiếu
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {election.status === "closed" && (
+          <DropdownMenuItem asChild>
+            <Link to="/elections/$id/scans" params={{ id: election.id }}>
+              <ScanLine className="mr-2 h-4 w-4" />
+              Xem lịch sử quét
             </Link>
           </DropdownMenuItem>
         )}
@@ -572,7 +594,7 @@ function ElectionActions({ election }: { election: Election }) {
         )}
         {election.status === "draft" && <ActivateElectionDialog election={election} />}
         {election.status === "active" && <CloseElectionDialog election={election} />}
-        <DeleteElectionDialog election={election} />
+        {election.status === "draft" && <DeleteElectionDialog election={election} />}
       </DropdownMenuContent>
     </DropdownMenu>
   );

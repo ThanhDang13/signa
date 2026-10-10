@@ -65,11 +65,14 @@ function RootComponent() {
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html suppressHydrationWarning>
+    <html lang="en" className="h-screen w-screen overflow-hidden" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
-      <body suppressHydrationWarning>
+      <body
+        className="bg-background flex h-full w-full flex-col antialiased"
+        suppressHydrationWarning
+      >
         {children}
         <Scripts />
       </body>

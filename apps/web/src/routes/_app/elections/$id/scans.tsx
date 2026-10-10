@@ -16,6 +16,7 @@ import {
 } from "@signa/react-ui/components/ui/breadcrumb";
 import { Separator } from "@signa/react-ui/components/ui/separator";
 import { SidebarTrigger } from "@signa/react-ui/components/ui/sidebar";
+import { ScrollArea } from "@signa/react-ui/components/ui/scroll-area";
 import * as React from "react";
 import { CheckCircle2, XCircle, Clock, AlertCircle, Eye } from "lucide-react";
 
@@ -135,7 +136,7 @@ function ScansPage() {
   ];
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex h-full flex-1 flex-col">
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
@@ -153,26 +154,28 @@ function ScansPage() {
           </BreadcrumbList>
         </Breadcrumb>
       </header>
-      <div className="flex-1 space-y-6 p-6">
-        <div>
-          <h1 className="text-3xl font-bold">Quản lý quét phiếu</h1>
-          <p className="text-muted-foreground">{election.title}</p>
-        </div>
+      <ScrollArea className="h-full flex-1">
+        <div className="space-y-6 p-6">
+          <div>
+            <h1 className="text-3xl font-bold">Quản lý quét phiếu</h1>
+            <p className="text-muted-foreground">{election.title}</p>
+          </div>
 
-        <DataTable
-          columns={columns}
-          data={scans}
-          pageCount={Math.ceil(scans.length / pagination.pageSize)}
-          rowCount={scans.length}
-          isLoading={false}
-          pagination={pagination}
-          onPaginationChange={setPagination}
-          sorting={sorting}
-          onSortingChange={setSorting}
-          columnFilters={columnFilters}
-          onColumnFiltersChange={setColumnFilters}
-        />
-      </div>
+          <DataTable
+            columns={columns}
+            data={scans}
+            pageCount={Math.ceil(scans.length / pagination.pageSize)}
+            rowCount={scans.length}
+            isLoading={false}
+            pagination={pagination}
+            onPaginationChange={setPagination}
+            sorting={sorting}
+            onSortingChange={setSorting}
+            columnFilters={columnFilters}
+            onColumnFiltersChange={setColumnFilters}
+          />
+        </div>
+      </ScrollArea>
     </div>
   );
 }

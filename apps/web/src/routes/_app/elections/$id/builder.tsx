@@ -14,6 +14,7 @@ import {
 } from "@signa/react-ui/components/ui/breadcrumb";
 import { Separator } from "@signa/react-ui/components/ui/separator";
 import { SidebarTrigger } from "@signa/react-ui/components/ui/sidebar";
+import { ScrollArea } from "@signa/react-ui/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
@@ -232,7 +233,7 @@ function RouteComponent() {
     : -1;
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex h-full flex-1 flex-col">
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
@@ -256,51 +257,53 @@ function RouteComponent() {
         </div>
       </header>
 
-      <div className="flex-1 p-4">
-        <div className="grid grid-cols-12 gap-4 h-full">
-          {/* Left Panel */}
-          <div className="col-span-4 space-y-4 overflow-auto">
-            <FieldList
-              fields={fields}
-              onFieldsChange={setFields}
-              onEditField={requestEditField}
-              onDeleteField={handleDeleteField}
-              onAddField={handleAddField}
-              selectedFieldId={selectedFieldId}
-            />
-          </div>
+      <ScrollArea className="h-full flex-1">
+        <div className="p-4">
+          <div className="grid h-full grid-cols-12 gap-4">
+            {/* Left Panel */}
+            <div className="col-span-4 space-y-4 overflow-auto">
+              <FieldList
+                fields={fields}
+                onFieldsChange={setFields}
+                onEditField={requestEditField}
+                onDeleteField={handleDeleteField}
+                onAddField={handleAddField}
+                selectedFieldId={selectedFieldId}
+              />
+            </div>
 
-          {/* Right Panel - Preview */}
-          <div className="col-span-8">
-            <Card className="h-full">
-              <CardHeader>
-                <CardTitle className="text-sm">Xem trước phiếu bầu</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <Button onClick={handlePreview} disabled={previewMutation.isPending}>
-                    {previewMutation.isPending ? "Đang tạo..." : "Xem trước PDF"}
-                  </Button>
+            {/* Right Panel - Preview */}
+            <div className="col-span-8">
+              <Card className="h-full">
+                <CardHeader>
+                  <CardTitle className="text-sm">Xem trước phiếu bầu</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <Button onClick={handlePreview} disabled={previewMutation.isPending}>
+                      {previewMutation.isPending ? "Đang tạo..." : "Xem trước PDF"}
+                    </Button>
 
-                  {previewUrl && (
-                    <iframe
-                      src={previewUrl}
-                      className="w-full h-[600px] border rounded"
-                      title="Ballot Preview"
-                    />
-                  )}
+                    {previewUrl && (
+                      <iframe
+                        src={previewUrl}
+                        className="h-[600px] w-full rounded border"
+                        title="Ballot Preview"
+                      />
+                    )}
 
-                  {!previewUrl && (
-                    <div className="border rounded p-8 text-center text-muted-foreground">
-                      Nhấn "Xem trước PDF" để tạo bản xem trước phiếu bầu
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                    {!previewUrl && (
+                      <div className="text-muted-foreground rounded border p-8 text-center">
+                        Nhấn "Xem trước PDF" để tạo bản xem trước phiếu bầu
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
-      </div>
+      </ScrollArea>
 
       {/* Field Properties Sheet */}
       <FieldPropertiesSheet
@@ -310,9 +313,7 @@ function RouteComponent() {
         totalFields={fields.length}
         onSave={handleSaveField}
         onSaveAndNext={handleSaveAndNext}
-        onSaveFromDialog={
-          discardAction === "switch" ? handleSaveAndSwitch : handleSaveAndClose
-        }
+        onSaveFromDialog={discardAction === "switch" ? handleSaveAndSwitch : handleSaveAndClose}
         onClose={requestCloseEditor}
         onDirtyChange={setIsEditorDirty}
         onNavigatePrevious={handleNavigatePrevious}
@@ -330,15 +331,13 @@ function RouteComponent() {
                 : "Bạn muốn lưu thay đổi trước khi đóng?"}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex-col sm:flex-row gap-2">
+          <DialogFooter className="flex-col gap-2 sm:flex-row">
             <Button variant="outline" onClick={handleKeepEditing}>
               Tiếp tục chỉnh sửa
             </Button>
             <Button
               variant="destructive"
-              onClick={
-                discardAction === "switch" ? handleDiscardAndSwitch : handleDiscardAndClose
-              }
+              onClick={discardAction === "switch" ? handleDiscardAndSwitch : handleDiscardAndClose}
             >
               Hủy thay đổi
             </Button>

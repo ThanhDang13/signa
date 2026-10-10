@@ -28,6 +28,7 @@ import {
 } from "@signa/react-ui/components/ui/breadcrumb";
 import { Separator } from "@signa/react-ui/components/ui/separator";
 import { SidebarTrigger } from "@signa/react-ui/components/ui/sidebar";
+import { ScrollArea } from "@signa/react-ui/components/ui/scroll-area";
 import * as React from "react";
 import { useState, useEffect } from "react";
 import { FileText, Download, Loader2, AlertCircle, CheckCircle2, Clock } from "lucide-react";
@@ -85,7 +86,7 @@ function BallotsPage() {
   }, [pendingOrProcessingBatches.length, electionId, queryClient]);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex h-full flex-1 flex-col">
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
@@ -103,32 +104,35 @@ function BallotsPage() {
           </BreadcrumbList>
         </Breadcrumb>
       </header>
-      <div className="flex-1 space-y-6 p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Quản lý phiếu bầu</h1>
-            <p className="text-muted-foreground">{election.title}</p>
-            {election.maxVoters && (
-              <p className="text-muted-foreground mt-1 text-sm">
-                {election.remainingBallots !== null && election.remainingBallots !== undefined ? (
-                  <>
-                    Còn lại: <span className="font-medium">{election.remainingBallots}</span> /{" "}
-                    {election.maxVoters} phiếu
-                  </>
-                ) : (
-                  <>Giới hạn: {election.maxVoters} phiếu</>
-                )}
-              </p>
-            )}
+      <ScrollArea className="h-full flex-1">
+        <div className="space-y-6 p-6">
+          {/* ... existing content ... */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Quản lý phiếu bầu</h1>
+              <p className="text-muted-foreground">{election.title}</p>
+              {election.maxVoters && (
+                <p className="text-muted-foreground mt-1 text-sm">
+                  {election.remainingBallots !== null && election.remainingBallots !== undefined ? (
+                    <>
+                      Còn lại: <span className="font-medium">{election.remainingBallots}</span> /{" "}
+                      {election.maxVoters} phiếu
+                    </>
+                  ) : (
+                    <>Giới hạn: {election.maxVoters} phiếu</>
+                  )}
+                </p>
+              )}
+            </div>
+            <GenerateBallotsDialog
+              electionId={electionId}
+              remainingBallots={election.remainingBallots}
+            />
           </div>
-          <GenerateBallotsDialog
-            electionId={electionId}
-            remainingBallots={election.remainingBallots}
-          />
-        </div>
 
-        <BatchesTab batches={batches} />
-      </div>
+          <BatchesTab batches={batches} />
+        </div>
+      </ScrollArea>
     </div>
   );
 }
