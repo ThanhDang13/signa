@@ -15,8 +15,11 @@ import { Route as howToFormRouteImport } from './routes/(how-to)/form'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppClerksIndexRouteImport } from './routes/_app/clerks/index'
 import { Route as AppElectionsIndexRouteImport } from './routes/_app/elections/index'
+import { Route as AppElectionsIdBallotsRouteImport } from './routes/_app/elections/$id/ballots'
 import { Route as AppElectionsIdBuilderRouteImport } from './routes/_app/elections/$id/builder'
 import { Route as AppElectionsIdResultsRouteImport } from './routes/_app/elections/$id/results'
+import { Route as AppElectionsIdScansRouteImport } from './routes/_app/elections/$id/scans'
+import { Route as AppElectionsIdSScansRequestIdRouteImport } from './routes/_app/elections/$id/_s.scans.$requestId'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -47,6 +50,11 @@ const AppElectionsIndexRoute = AppElectionsIndexRouteImport.update({
   path: '/elections/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppElectionsIdBallotsRoute = AppElectionsIdBallotsRouteImport.update({
+  id: '/elections/$id/ballots',
+  path: '/elections/$id/ballots',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppElectionsIdBuilderRoute = AppElectionsIdBuilderRouteImport.update({
   id: '/elections/$id/builder',
   path: '/elections/$id/builder',
@@ -57,6 +65,17 @@ const AppElectionsIdResultsRoute = AppElectionsIdResultsRouteImport.update({
   path: '/elections/$id/results',
   getParentRoute: () => AppRoute,
 } as any)
+const AppElectionsIdScansRoute = AppElectionsIdScansRouteImport.update({
+  id: '/elections/$id/scans',
+  path: '/elections/$id/scans',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppElectionsIdSScansRequestIdRoute =
+  AppElectionsIdSScansRequestIdRouteImport.update({
+    id: '/elections/$id/_s/scans/$requestId',
+    path: '/elections/$id/scans/$requestId',
+    getParentRoute: () => AppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -64,8 +83,11 @@ export interface FileRoutesByFullPath {
   '/form': typeof howToFormRoute
   '/clerks/': typeof AppClerksIndexRoute
   '/elections/': typeof AppElectionsIndexRoute
+  '/elections/$id/ballots': typeof AppElectionsIdBallotsRoute
   '/elections/$id/builder': typeof AppElectionsIdBuilderRoute
   '/elections/$id/results': typeof AppElectionsIdResultsRoute
+  '/elections/$id/scans': typeof AppElectionsIdScansRoute
+  '/elections/$id/scans/$requestId': typeof AppElectionsIdSScansRequestIdRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof authLoginRoute
@@ -73,8 +95,11 @@ export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/clerks': typeof AppClerksIndexRoute
   '/elections': typeof AppElectionsIndexRoute
+  '/elections/$id/ballots': typeof AppElectionsIdBallotsRoute
   '/elections/$id/builder': typeof AppElectionsIdBuilderRoute
   '/elections/$id/results': typeof AppElectionsIdResultsRoute
+  '/elections/$id/scans': typeof AppElectionsIdScansRoute
+  '/elections/$id/scans/$requestId': typeof AppElectionsIdSScansRequestIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -84,8 +109,11 @@ export interface FileRoutesById {
   '/_app/': typeof AppIndexRoute
   '/_app/clerks/': typeof AppClerksIndexRoute
   '/_app/elections/': typeof AppElectionsIndexRoute
+  '/_app/elections/$id/ballots': typeof AppElectionsIdBallotsRoute
   '/_app/elections/$id/builder': typeof AppElectionsIdBuilderRoute
   '/_app/elections/$id/results': typeof AppElectionsIdResultsRoute
+  '/_app/elections/$id/scans': typeof AppElectionsIdScansRoute
+  '/_app/elections/$id/_s/scans/$requestId': typeof AppElectionsIdSScansRequestIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -95,8 +123,11 @@ export interface FileRouteTypes {
     | '/form'
     | '/clerks/'
     | '/elections/'
+    | '/elections/$id/ballots'
     | '/elections/$id/builder'
     | '/elections/$id/results'
+    | '/elections/$id/scans'
+    | '/elections/$id/scans/$requestId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -104,8 +135,11 @@ export interface FileRouteTypes {
     | '/'
     | '/clerks'
     | '/elections'
+    | '/elections/$id/ballots'
     | '/elections/$id/builder'
     | '/elections/$id/results'
+    | '/elections/$id/scans'
+    | '/elections/$id/scans/$requestId'
   id:
     | '__root__'
     | '/_app'
@@ -114,8 +148,11 @@ export interface FileRouteTypes {
     | '/_app/'
     | '/_app/clerks/'
     | '/_app/elections/'
+    | '/_app/elections/$id/ballots'
     | '/_app/elections/$id/builder'
     | '/_app/elections/$id/results'
+    | '/_app/elections/$id/scans'
+    | '/_app/elections/$id/_s/scans/$requestId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -168,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppElectionsIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/elections/$id/ballots': {
+      id: '/_app/elections/$id/ballots'
+      path: '/elections/$id/ballots'
+      fullPath: '/elections/$id/ballots'
+      preLoaderRoute: typeof AppElectionsIdBallotsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/elections/$id/builder': {
       id: '/_app/elections/$id/builder'
       path: '/elections/$id/builder'
@@ -182,6 +226,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppElectionsIdResultsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/elections/$id/scans': {
+      id: '/_app/elections/$id/scans'
+      path: '/elections/$id/scans'
+      fullPath: '/elections/$id/scans'
+      preLoaderRoute: typeof AppElectionsIdScansRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/elections/$id/_s/scans/$requestId': {
+      id: '/_app/elections/$id/_s/scans/$requestId'
+      path: '/elections/$id/scans/$requestId'
+      fullPath: '/elections/$id/scans/$requestId'
+      preLoaderRoute: typeof AppElectionsIdSScansRequestIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -189,16 +247,22 @@ interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppClerksIndexRoute: typeof AppClerksIndexRoute
   AppElectionsIndexRoute: typeof AppElectionsIndexRoute
+  AppElectionsIdBallotsRoute: typeof AppElectionsIdBallotsRoute
   AppElectionsIdBuilderRoute: typeof AppElectionsIdBuilderRoute
   AppElectionsIdResultsRoute: typeof AppElectionsIdResultsRoute
+  AppElectionsIdScansRoute: typeof AppElectionsIdScansRoute
+  AppElectionsIdSScansRequestIdRoute: typeof AppElectionsIdSScansRequestIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppClerksIndexRoute: AppClerksIndexRoute,
   AppElectionsIndexRoute: AppElectionsIndexRoute,
+  AppElectionsIdBallotsRoute: AppElectionsIdBallotsRoute,
   AppElectionsIdBuilderRoute: AppElectionsIdBuilderRoute,
   AppElectionsIdResultsRoute: AppElectionsIdResultsRoute,
+  AppElectionsIdScansRoute: AppElectionsIdScansRoute,
+  AppElectionsIdSScansRequestIdRoute: AppElectionsIdSScansRequestIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

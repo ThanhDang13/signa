@@ -7,6 +7,7 @@ export const getScanRequestParamsSchema = z.object({
 export const getScanRequestResponseSchema = z.object({
   requestId: z.string().uuid(),
   ballotId: z.string().uuid(),
+  electionId: z.string().uuid(),
   status: z.enum(["pending", "processing", "completed", "failed"]),
   s3Url: z.string(), // Generated on-demand presigned URL
   createdAt: z.string(),

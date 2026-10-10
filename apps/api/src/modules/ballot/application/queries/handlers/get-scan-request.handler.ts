@@ -29,6 +29,7 @@ export class GetScanRequestHandler implements IQueryHandler<GetScanRequestQuery>
         // Outbox fields
         id: schemas.omrProcessingOutbox.id,
         ballotId: schemas.omrProcessingOutbox.ballotId,
+        electionId: schemas.omrProcessingOutbox.electionId,
         userId: schemas.omrProcessingOutbox.userId,
         s3Key: schemas.omrProcessingOutbox.s3Key,
         status: schemas.omrProcessingOutbox.status,
@@ -70,6 +71,7 @@ export class GetScanRequestHandler implements IQueryHandler<GetScanRequestQuery>
     const response: any = {
       requestId: row.id,
       ballotId: row.ballotId,
+      electionId: row.electionId,
       status: row.status,
       s3Url, // Generated on-demand
       createdAt: row.createdAt,

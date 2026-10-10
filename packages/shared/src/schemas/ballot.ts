@@ -16,3 +16,17 @@ export const ballotReadModelSchema = z.object({
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime()
 });
+
+/**
+ * Ballot batch read model schema - for ballot generation tracking
+ */
+export const ballotBatchReadModelSchema = z.object({
+  id: z.string().uuid(),
+  electionId: z.string().uuid(),
+  count: z.number().int().positive(),
+  status: z.enum(["pending", "processing", "completed", "failed"]),
+  batchPdfS3Key: z.string().optional(),
+  lastError: z.string().optional(),
+  createdAt: z.iso.datetime(),
+  processedAt: z.iso.datetime().optional()
+});

@@ -57,6 +57,8 @@ export default function ScanRetryScreen() {
       return;
     }
 
+    let step: "presign" | "upload" | "retry" = "presign";
+
     try {
       // 1. Get presigned URL
       const uploadData = await uploadMutation.mutateAsync({
@@ -65,26 +67,32 @@ export default function ScanRetryScreen() {
       });
 
       // 2. Upload to S3
+      step = "upload";
       const response = await fetch(capturedImage.uri);
       const blob = await response.blob();
 
-      await fetch(uploadData.uploadUrl, {
+      const putRes = await fetch(uploadData.uploadUrl, {
         method: "PUT",
         body: blob,
         headers: { "Content-Type": "image/jpeg" }
       });
+      if (!putRes.ok) throw new Error(`S3 upload failed: ${putRes.status}`);
 
       // 3. Trigger retry processing
+      step = "retry";
       await retryMutation.mutateAsync({
         params: { requestId: requestId || "" },
         body: { s3Key: uploadData.s3Key }
       });
 
       // Invalidate queries
-      queryClient.invalidateQueries({ queryKey: ballotKeys.scanRequest(requestId || "") });
-      queryClient.invalidateQueries({ queryKey: ballotKeys.scanRequests(0, 10) });
+      queryClient.invalidateQueries({
+        queryKey: ballotKeys.scanRequest(requestId || "")
+      });
+      queryClient.invalidateQueries({
+        queryKey: ballotKeys.scanRequests(0, 10)
+      });
 
-      // Show success toast
       toast({
         title: "Thử lại thành công",
         description: "Phiếu bầu đang được xử lý lại",
@@ -92,15 +100,29 @@ export default function ScanRetryScreen() {
         icon: CheckCircle
       });
 
-      // 4. Navigate home
       router.replace("/");
     } catch (error) {
-      console.error("Retry failed:", error);
+      console.error(`Retry failed at step "${step}":`, error);
 
-      // Show error toast
+      const messages = {
+        presign: {
+          title: "Phiếu không hợp lệ",
+          description:
+            "Phiếu đã được sử dụng hoặc không còn ở trạng thái hợp lệ. Vui lòng kiểm tra lại."
+        },
+        upload: {
+          title: "Tải ảnh lên thất bại",
+          description: "Vui lòng kiểm tra kết nối mạng và thử lại."
+        },
+        retry: {
+          title: "Không thể thử lại",
+          description:
+            "Yêu cầu quét đã được xử lý hoặc không còn cho phép thử lại. Vui lòng kiểm tra lại danh sách."
+        }
+      };
+
       toast({
-        title: "Lỗi thử lại",
-        description: error instanceof Error ? error.message : "Vui lòng thử lại",
+        ...messages[step],
         variant: "error",
         icon: AlertCircle
       });

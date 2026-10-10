@@ -23,6 +23,7 @@ export class DrizzleBallotGenerationOutboxRepository implements BallotGeneration
       attempts: request.attempts,
       lastError: request.lastError,
       processedAt: request.processedAt?.toISOString(),
+      batchPdfS3Key: request.batchPdfS3Key,
       createdAt: request.createdAt.toISOString(),
       updatedAt: request.updatedAt.toISOString()
     });
@@ -45,6 +46,7 @@ export class DrizzleBallotGenerationOutboxRepository implements BallotGeneration
         attempts: row.attempts,
         lastError: row.lastError ?? undefined,
         processedAt: row.processedAt ?? undefined,
+        batchPdfS3Key: row.batchPdfS3Key ?? undefined,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt
       })
@@ -59,6 +61,7 @@ export class DrizzleBallotGenerationOutboxRepository implements BallotGeneration
         attempts: request.attempts,
         lastError: request.lastError,
         processedAt: request.processedAt?.toISOString(),
+        batchPdfS3Key: request.batchPdfS3Key,
         updatedAt: request.updatedAt.toISOString()
       })
       .where(eq(schemas.ballotGenerationOutbox.id, request.id.toString()));

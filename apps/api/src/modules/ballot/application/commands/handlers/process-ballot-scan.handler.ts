@@ -75,6 +75,7 @@ export class ProcessBallotScanHandler implements ICommandHandler<ProcessBallotSc
     // 5. Create new OMR processing request
     const request = OmrProcessingRequest.create({
       ballotId,
+      electionId: ballot.electionId,
       userId,
       s3Key
     });

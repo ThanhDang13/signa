@@ -16,7 +16,10 @@ export default function ScanScreen() {
   const [showCamera, setShowCamera] = useState(true);
   const [capturedImage, setCapturedImage] = useState<{
     uri: string;
-    qrResult: { ballotId: string | null; error: "not_found" | "decode_failed" | null };
+    qrResult: {
+      ballotId: string | null;
+      error: "not_found" | "decode_failed" | null;
+    };
     quality: { isGoodEnough: boolean; issues: string[] };
   } | null>(null);
 
@@ -25,7 +28,10 @@ export default function ScanScreen() {
 
   const handleCapture = (
     uri: string,
-    qrResult: { ballotId: string | null; error: "not_found" | "decode_failed" | null },
+    qrResult: {
+      ballotId: string | null;
+      error: "not_found" | "decode_failed" | null;
+    },
     quality: any
   ) => {
     setCapturedImage({ uri, qrResult, quality });
@@ -40,30 +46,35 @@ export default function ScanScreen() {
   const handleAccept = async () => {
     if (!capturedImage?.qrResult.ballotId) return;
 
+    const ballotId = capturedImage.qrResult.ballotId;
+    let step: "presign" | "upload" | "process" = "presign";
+
     try {
       // 1. Get presigned URL
       const uploadData = await uploadMutation.mutateAsync({
-        params: { ballotId: capturedImage.qrResult.ballotId },
+        params: { ballotId },
         body: { contentType: "image/jpeg" }
       });
 
       // 2. Upload to S3
+      step = "upload";
       const response = await fetch(capturedImage.uri);
       const blob = await response.blob();
 
-      await fetch(uploadData.uploadUrl, {
+      const putRes = await fetch(uploadData.uploadUrl, {
         method: "PUT",
         body: blob,
         headers: { "Content-Type": "image/jpeg" }
       });
+      if (!putRes.ok) throw new Error(`S3 upload failed: ${putRes.status}`);
 
       // 3. Trigger OMR processing
+      step = "process";
       await processMutation.mutateAsync({
-        params: { ballotId: capturedImage.qrResult.ballotId },
+        params: { ballotId },
         body: { s3Key: uploadData.s3Key }
       });
 
-      // Show success toast
       toast({
         title: "Quét phiếu thành công",
         description: "Phiếu bầu đã được xử lý",
@@ -71,15 +82,28 @@ export default function ScanScreen() {
         icon: CheckCircle
       });
 
-      // 4. Navigate home
       router.replace("/");
     } catch (error) {
-      console.error("Upload failed:", error);
+      console.error(`Scan failed at step "${step}":`, error);
 
-      // Show error toast
+      const messages = {
+        presign: {
+          title: "Phiếu không hợp lệ",
+          description:
+            "Phiếu đã được sử dụng hoặc không còn ở trạng thái hợp lệ. Vui lòng kiểm tra lại."
+        },
+        upload: {
+          title: "Tải ảnh lên thất bại",
+          description: "Vui lòng kiểm tra kết nối mạng và thử lại."
+        },
+        process: {
+          title: "Không thể xử lý phiếu",
+          description: "Ảnh phiếu không đọc được hoặc phiếu không còn hợp lệ. Vui lòng chụp lại."
+        }
+      };
+
       toast({
-        title: "Lỗi xử lý phiếu",
-        description: error instanceof Error ? error.message : "Vui lòng thử lại",
+        ...messages[step],
         variant: "error",
         icon: AlertCircle
       });

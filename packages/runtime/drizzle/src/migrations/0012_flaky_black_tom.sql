@@ -1,0 +1,1 @@
+ALTER TABLE "ballot_generation_outbox" ADD COLUMN "batch_pdf_s3_key" text;

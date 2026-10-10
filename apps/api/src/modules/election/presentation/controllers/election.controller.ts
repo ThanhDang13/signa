@@ -10,7 +10,8 @@ import {
   deleteElectionContract,
   getElectionContract,
   listElectionsContract,
-  getElectionResultsContract
+  getElectionResultsContract,
+  getDashboardStatsContract
 } from "@signa/contracts-http/election";
 import {
   CreateElectionCommand,
@@ -52,12 +53,16 @@ import {
   ListElectionsQueryDto,
   ListElectionsOutputDto
 } from "@signa/api/modules/election/presentation/dto/list-elections.dto";
+import {
+  GetDashboardStatsOutputDto
+} from "@signa/api/modules/election/presentation/dto/get-dashboard-stats.dto";
 import { Protected } from "@signa/api/core/security/decorator";
 import { CurrentUser, type JwtPayload } from "@signa/nest-jwt";
 import {
   GetElectionByIdQuery,
   GetElectionResultsQuery,
-  ListElectionsQuery
+  ListElectionsQuery,
+  GetDashboardStatsQuery
 } from "@signa/api/modules/election/application/queries";
 
 const CreateElectionRoute = ContractRoute(createElectionContract, {
@@ -90,6 +95,10 @@ const ListElectionsRoute = ContractRoute(listElectionsContract, {
 
 const GetElectionResultsRoute = ContractRoute(getElectionResultsContract, {
   summary: "Get election results and statistics"
+});
+
+const GetDashboardStatsRoute = ContractRoute(getDashboardStatsContract, {
+  summary: "Get dashboard statistics"
 });
 
 @ApiTags("ELECTIONS")
@@ -195,5 +204,13 @@ export class ElectionController {
   @HttpCode(HttpStatus.OK)
   async getResults(@Param() params: GetElectionResultsParamsDto, @CurrentUser() user: JwtPayload) {
     return this.queryBus.execute(new GetElectionResultsQuery({ id: params.id }));
+  }
+
+  @GetDashboardStatsRoute
+  @Protected()
+  @Response({ type: GetDashboardStatsOutputDto })
+  @HttpCode(HttpStatus.OK)
+  async getDashboardStats(@CurrentUser() user: JwtPayload) {
+    return this.queryBus.execute(new GetDashboardStatsQuery({}));
   }
 }

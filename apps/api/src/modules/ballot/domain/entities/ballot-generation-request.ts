@@ -28,6 +28,9 @@ export class BallotGenerationRequest extends BaseEntity {
   @Accessor({ touchOnSet: true, allowUndefined: true })
   public processedAt?: Date;
 
+  @Accessor({ touchOnSet: true, allowUndefined: true })
+  public batchPdfS3Key?: string;
+
   private constructor(
     props: {
       id: BallotGenerationRequestId;
@@ -38,6 +41,7 @@ export class BallotGenerationRequest extends BaseEntity {
       attempts: number;
       lastError?: string;
       processedAt?: Date;
+      batchPdfS3Key?: string;
     },
     isNew = true
   ) {
@@ -50,6 +54,7 @@ export class BallotGenerationRequest extends BaseEntity {
     this.attempts = props.attempts;
     this.lastError = props.lastError;
     this.processedAt = props.processedAt;
+    this.batchPdfS3Key = props.batchPdfS3Key;
   }
 
   static create(props: { electionId: string; ballotIds: string[] }): BallotGenerationRequest {
@@ -72,6 +77,7 @@ export class BallotGenerationRequest extends BaseEntity {
     attempts: number;
     lastError?: string;
     processedAt?: string;
+    batchPdfS3Key?: string;
     createdAt: string;
     updatedAt: string;
   }): BallotGenerationRequest {
@@ -84,7 +90,8 @@ export class BallotGenerationRequest extends BaseEntity {
         status: props.status,
         attempts: props.attempts,
         lastError: props.lastError,
-        processedAt: props.processedAt ? new Date(props.processedAt) : undefined
+        processedAt: props.processedAt ? new Date(props.processedAt) : undefined,
+        batchPdfS3Key: props.batchPdfS3Key
       },
       false
     );
@@ -100,6 +107,10 @@ export class BallotGenerationRequest extends BaseEntity {
   markAsCompleted(): void {
     this.status = "completed";
     this.processedAt = new Date();
+  }
+
+  setBatchPdfS3Key(s3Key: string): void {
+    this.batchPdfS3Key = s3Key;
   }
 
   markAsFailed(error: string): void {

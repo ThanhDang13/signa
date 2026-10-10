@@ -17,11 +17,17 @@ export class ListScanRequestsHandler implements IQueryHandler<ListScanRequestsQu
   ) {}
 
   async execute(query: ListScanRequestsQuery) {
-    const { userId, pageIndex, pageSize, status } = query.payload;
+    const { userId, pageIndex, pageSize, status, electionId } = query.payload;
     const offset = pageIndex * pageSize;
 
     // Build where conditions
-    const conditions = [eq(schemas.omrProcessingOutbox.userId, userId)];
+    const conditions = [];
+    if (userId) {
+      conditions.push(eq(schemas.omrProcessingOutbox.userId, userId));
+    }
+    if (electionId) {
+      conditions.push(eq(schemas.omrProcessingOutbox.electionId, electionId));
+    }
     if (status === "completed") {
       conditions.push(eq(schemas.omrProcessingOutbox.status, "completed"));
     } else if (status === "failed") {
@@ -30,7 +36,7 @@ export class ListScanRequestsHandler implements IQueryHandler<ListScanRequestsQu
       conditions.push(eq(schemas.omrProcessingOutbox.status, status));
     }
 
-    const whereClause = and(...conditions);
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
     // Query outbox with LEFT JOIN to results
     const [rows, countResult] = await Promise.all([
@@ -39,6 +45,8 @@ export class ListScanRequestsHandler implements IQueryHandler<ListScanRequestsQu
           // Outbox fields
           id: schemas.omrProcessingOutbox.id,
           ballotId: schemas.omrProcessingOutbox.ballotId,
+          electionId: schemas.omrProcessingOutbox.electionId,
+          userId: schemas.omrProcessingOutbox.userId,
           s3Key: schemas.omrProcessingOutbox.s3Key,
           status: schemas.omrProcessingOutbox.status,
           processedAt: schemas.omrProcessingOutbox.processedAt,
@@ -64,6 +72,7 @@ export class ListScanRequestsHandler implements IQueryHandler<ListScanRequestsQu
     ]);
 
     const totalCount = countResult[0]?.count ?? 0;
+    const totalPages = Math.ceil(totalCount / pageSize);
 
     // Generate S3 URLs on-demand for each row
     const items = await Promise.all(
@@ -73,6 +82,8 @@ export class ListScanRequestsHandler implements IQueryHandler<ListScanRequestsQu
         return {
           requestId: row.id,
           ballotId: row.ballotId,
+          electionId: row.electionId,
+          userId: row.userId,
           status: row.status,
           validationStatus: row.resultValidationStatus || null,
           qrVerified: row.resultQrVerified ?? null,
@@ -85,10 +96,13 @@ export class ListScanRequestsHandler implements IQueryHandler<ListScanRequestsQu
     );
 
     return {
-      items,
-      pageIndex,
-      pageSize,
-      total: totalCount
+      data: items,
+      meta: {
+        pageIndex,
+        pageSize,
+        totalCount,
+        totalPages
+      }
     };
   }
 }

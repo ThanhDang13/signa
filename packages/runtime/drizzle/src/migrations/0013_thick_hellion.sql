@@ -1,0 +1,1 @@
+ALTER TABLE "omr_processing_outbox" ADD COLUMN "election_id" uuid NOT NULL;

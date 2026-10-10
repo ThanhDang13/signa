@@ -104,6 +104,7 @@ export class BallotGenerationOutboxScheduler {
 
           await Promise.all(ballotEntities.map((ballot) => this.ballotRepo.save(ballot)));
 
+          request.setBatchPdfS3Key(data.batchPdfS3Key);
           request.markAsCompleted();
           await this.outboxRepo.update(request);
           this.logger.log(`Batch of ${data.ballots.length} ballot(s) generated successfully`);

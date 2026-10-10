@@ -32,6 +32,7 @@ export const ballotGenerationOutbox = pgTable("ballot_generation_outbox", {
   attempts: integer("attempts").notNull().default(0),
   lastError: text("last_error"),
   processedAt: ISO8601Timestamp("processed_at", { withTimezone: true }),
+  batchPdfS3Key: text("batch_pdf_s3_key"), // S3 key for the generated batch PDF
   ...timestamps
 });
 
@@ -42,6 +43,7 @@ export const omrProcessingOutbox = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     ballotId: uuid("ballot_id").notNull(),
+    electionId: uuid("election_id").notNull(),
     userId: uuid("user_id").notNull(), // NOT NULL is safe: existing migrations use same pattern (see 0003)
     s3Key: text("s3_key").notNull(),
     status: outboxStatusEnum("status").notNull().default("pending").$type<OutboxStatus>(),

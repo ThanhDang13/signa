@@ -1,7 +1,7 @@
 import { QueryHandler, IQueryHandler } from "@nestjs/cqrs";
 import { InjectDatabase } from "@signa/nest-drizzle";
 import type { DrizzleDatabase } from "@signa/api/core/database/database.config";
-import { eq } from "drizzle-orm";
+import { eq, count } from "drizzle-orm";
 import * as schemas from "@signa/runtime-drizzle/schemas";
 import { GetElectionByIdQuery, type GetElectionByIdQueryResult } from "../get-election-by-id.query";
 import { createElectionNotFoundError } from "@signa/api/modules/election/application/errors";
@@ -19,6 +19,20 @@ export class GetElectionByIdHandler implements IQueryHandler<GetElectionByIdQuer
       throw createElectionNotFoundError();
     }
 
+    // Count existing ballots for this election
+    const ballotCountResult = await this.db
+      .select({ count: count() })
+      .from(schemas.ballots)
+      .where(eq(schemas.ballots.electionId, query.payload.id));
+
+    const currentBallotCount = ballotCountResult[0]?.count ?? 0;
+
+    // Calculate remaining ballots if maxVoters is set
+    const remainingBallots =
+      row.maxVoters !== null && row.maxVoters !== undefined
+        ? Math.max(0, row.maxVoters - currentBallotCount)
+        : null;
+
     return {
       id: row.id,
       title: row.title,
@@ -30,7 +44,8 @@ export class GetElectionByIdHandler implements IQueryHandler<GetElectionByIdQuer
       maxVoters: row.maxVoters ?? undefined,
       createdById: row.createdById,
       createdAt: row.createdAt,
-      updatedAt: row.updatedAt
+      updatedAt: row.updatedAt,
+      remainingBallots
     };
   }
 }

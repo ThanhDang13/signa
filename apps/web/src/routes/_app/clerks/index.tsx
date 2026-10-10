@@ -76,10 +76,15 @@ function RouteComponent() {
   const [columnFilters, setColumnFilters] = React.useState<Array<{ id: string; value: unknown }>>(
     []
   );
-  const [searchQuery, setSearchQuery] = React.useState("");
 
   const sortBy = sorting[0]?.id || "createdAt";
   const order = sorting[0]?.desc ? "desc" : "asc";
+
+  // Extract search query from columnFilters
+  const searchQuery = React.useMemo(() => {
+    const filter = columnFilters.find((f) => f.id === "email");
+    return (filter?.value as string) || "";
+  }, [columnFilters]);
 
   const { data, isLoading } = useQuery(
     listClerksOptions({
@@ -92,6 +97,7 @@ function RouteComponent() {
     })
   );
 
+  // Client-side search filter
   const filteredData = React.useMemo(() => {
     if (!data?.data) return [];
     if (!searchQuery) return data.data;
@@ -156,7 +162,7 @@ function RouteComponent() {
           onColumnFiltersChange={setColumnFilters}
           searchableColumns={[
             {
-              id: "search",
+              id: "email",
               title: "Tìm kiếm theo email hoặc họ tên"
             }
           ]}

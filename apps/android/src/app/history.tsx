@@ -9,6 +9,7 @@ import { Button } from "@signa/android/components/ui/button";
 import { Icon } from "@signa/android/components/ui/icon";
 import { Text } from "@signa/android/components/ui/text";
 import { ballotKeys, ballotQueries, FilterType } from "@signa/android/lib/tanstack/options/ballot";
+import { useIsFocused } from "@react-navigation/native";
 
 const PAGE_SIZE = 20;
 
@@ -145,7 +146,7 @@ export default function HistoryScreen() {
     if (!data) return;
 
     // Apply client-side filtering based on validationStatus
-    const filteredItems = data.items.filter((request) => {
+    const filteredItems = data.data.filter((request) => {
       if (filter === "all") return true;
       if (filter === "pending") return request.status === "pending";
       if (filter === "processing") return request.status === "processing";
@@ -172,7 +173,7 @@ export default function HistoryScreen() {
     });
   }, [data, pageIndex, filter]);
 
-  const hasMore = requests.length < (data?.total ?? 0);
+  const hasMore = requests.length < (data?.meta.totalCount ?? 0);
 
   const refreshHistory = async () => {
     setRequests([]);
@@ -193,10 +194,12 @@ export default function HistoryScreen() {
 
   const filters: FilterType[] = ["all", "valid", "invalid", "pending", "processing"];
 
+  const isFocused = useIsFocused();
+
   // Lightweight status polling - returns only pending/processing items
   const { data: pollData } = useQuery({
     ...ballotQueries.pollScanStatus(),
-    enabled: true,
+    enabled: isFocused,
     refetchInterval: 5000,
     gcTime: 0
   });
@@ -233,7 +236,7 @@ export default function HistoryScreen() {
             <View className="flex-1">
               <Text className="text-2xl font-bold text-foreground">Lịch sử quét</Text>
               <Text className="mt-1 text-sm text-muted-foreground">
-                {data ? `${data.total} phiếu đã gửi` : "Danh sách phiếu đã gửi"}
+                {data ? `${data.meta.totalCount} phiếu đã gửi` : "Danh sách phiếu đã gửi"}
               </Text>
             </View>
             <Link href="/settings" asChild>

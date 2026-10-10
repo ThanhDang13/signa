@@ -27,7 +27,18 @@ export class UpdateElectionHandler implements ICommandHandler<UpdateElectionComm
     }
 
     if (title || description !== undefined || formStructure) {
-      election.updateDetails(title ?? election.title, description, formStructure);
+      // If title or description changed but formStructure not provided, sync formStructure
+      const updatedFormStructure = formStructure || {
+        ...election.formStructure,
+        title: title ?? election.title,
+        description: description !== undefined ? description : election.description
+      };
+
+      election.updateDetails(
+        title ?? election.title,
+        description,
+        updatedFormStructure
+      );
     }
 
     if (startDate !== undefined || endDate !== undefined) {

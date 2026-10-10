@@ -9,14 +9,20 @@ import {
   BALLOT_GENERATION_OUTBOX_REPOSITORY,
   type BallotGenerationOutboxRepository
 } from "@signa/api/modules/ballot/application/ports";
+import {
+  BALLOT_REPOSITORY,
+  type BallotRepository
+} from "@signa/api/modules/ballot/application/ports";
 import { BallotGenerationRequest } from "@signa/api/modules/ballot/domain/entities";
 import { createElectionNotFoundError, createElectionNotActiveError } from "@signa/api/modules/election/application/errors";
+import { createMaxVotersExceededError } from "@signa/api/modules/ballot/application/errors";
 import { v7 as uuidv7 } from "uuid";
 
 @CommandHandler(GenerateBallotsCommand)
 export class GenerateBallotsHandler implements ICommandHandler<GenerateBallotsCommand> {
   constructor(
     @Inject(ELECTION_REPOSITORY) private readonly elections: ElectionRepository,
+    @Inject(BALLOT_REPOSITORY) private readonly ballots: BallotRepository,
     @Inject(BALLOT_GENERATION_OUTBOX_REPOSITORY)
     private readonly outboxRepo: BallotGenerationOutboxRepository
   ) {}
@@ -33,6 +39,16 @@ export class GenerateBallotsHandler implements ICommandHandler<GenerateBallotsCo
     // Only allow ballot generation for active elections
     if (!election.isActive()) {
       throw createElectionNotActiveError();
+    }
+
+    // Check maxVoters limit if set
+    if (election.maxVoters !== undefined && election.maxVoters !== null) {
+      const currentBallotCount = await this.ballots.countByElectionId(electionId);
+      const totalAfterGeneration = currentBallotCount + count;
+
+      if (totalAfterGeneration > election.maxVoters) {
+        throw createMaxVotersExceededError(currentBallotCount, count, election.maxVoters);
+      }
     }
 
     // Create a single batch request with all ballot IDs

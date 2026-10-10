@@ -101,7 +101,7 @@ export default function HomeScreen() {
   // Main query - no polling
   const { data, isError, isLoading } = useQuery(ballotQueries.listScanRequests(0, 20, "all"));
 
-  const requests = data?.items ?? [];
+  const requests = data?.data ?? [];
   const successfulRequests = requests.filter(
     (request) => request.status === "completed" && request.validationStatus === "valid"
   );
@@ -163,7 +163,7 @@ export default function HomeScreen() {
               <View className="flex-1 items-center border-r border-border px-2 py-4">
                 <Icon as={ClipboardList} size={19} className="mb-2 text-muted-foreground" />
                 <Text className="text-2xl font-bold text-foreground">
-                  {isLoading ? "—" : (data?.total ?? 0)}
+                  {isLoading ? "—" : (data?.meta.totalCount ?? 0)}
                 </Text>
                 <Text className="mt-1 text-xs text-muted-foreground">Tổng phiếu</Text>
               </View>

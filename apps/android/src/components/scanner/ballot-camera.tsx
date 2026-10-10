@@ -304,7 +304,6 @@ export function BallotCamera({ onCapture, onClose, expectedBallotId }: BallotCam
   const [facing] = useState<CameraType>("back");
   const [permission, requestPermission] = useCameraPermissions();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [barcodeScanningEnabled, setBarcodeScanningEnabled] = useState(true);
   const [cameraLayout, setCameraLayout] = useState({ width: 0, height: 0 });
   const cameraRef = useRef<CameraView>(null);
   const sensorSize = useRef<CameraSize>({ width: 1080, height: 1920 });
@@ -415,23 +414,15 @@ export function BallotCamera({ onCapture, onClose, expectedBallotId }: BallotCam
       hasCamera: !!cameraRef.current,
       isProcessing,
       hasLayout,
-      barcodeScanningEnabled,
     });
     if (!cameraRef.current || isProcessing || !hasLayout) return;
+
+    setIsProcessing(true);
     lastQrDetection.current = { fingerprint: "", timestamp: 0 };
     lastFrameFingerprint.current = "";
 
-    setIsProcessing(true);
-
-    // Disable barcode scanning first to free up the camera
-    setBarcodeScanningEnabled(false);
-
-    // Wait a moment for barcode scanning to fully stop
-    // This prevents ERR_IMAGE_CAPTURE_FAILED
-    await new Promise(resolve => setTimeout(resolve, 150));
-
     try {
-      console.log("Attempting to take picture with barcode scanning enabled:", barcodeScanningEnabled);
+      console.log("Executing picture capture");
       // Take picture with minimal options
       const photo = await cameraRef.current.takePictureAsync({
         quality: 1,
@@ -478,7 +469,10 @@ export function BallotCamera({ onCapture, onClose, expectedBallotId }: BallotCam
         croppedResult.height,
       );
 
-      const quality = await analyzeImageQuality(croppedResult.uri);
+      const quality = await analyzeImageQuality(croppedResult.uri, {
+        width: croppedResult.width,
+        height: croppedResult.height,
+      });
       const qrResult = await extractQrFromImage(croppedResult.uri);
       console.log("QR result:", qrResult);
 
@@ -492,8 +486,8 @@ export function BallotCamera({ onCapture, onClose, expectedBallotId }: BallotCam
         variant: "error",
         icon: AlertCircle,
       });
+    } finally {
       setIsProcessing(false);
-      setBarcodeScanningEnabled(true);
     }
   }
 
@@ -504,15 +498,7 @@ export function BallotCamera({ onCapture, onClose, expectedBallotId }: BallotCam
         style={StyleSheet.absoluteFillObject}
         facing={facing}
         autofocus="on"
-        barcodeScannerSettings={
-          barcodeScanningEnabled ? { barcodeTypes: ["qr"] } : undefined
-        }
         onCameraReady={captureSensorSize}
-        onBarcodeScanned={
-          isProcessing || !barcodeScanningEnabled
-            ? undefined
-            : handleBarcodeScanned
-        }
         onLayout={(e) => {
           const layout = e.nativeEvent.layout;
           console.log(

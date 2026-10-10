@@ -4,3 +4,4 @@ export * from "./outbox";
 export * from "./pagination";
 export * from "./election";
 export * from "./ballot";
+export * from "./dashboard";

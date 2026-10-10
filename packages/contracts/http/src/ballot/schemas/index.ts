@@ -8,5 +8,6 @@ export * from "./get-ballot.schema";
 export * from "./list-ballots.schema";
 export * from "./get-scan-request.schema";
 export * from "./list-scan-requests.schema";
+export * from "./admin-list-scan-requests.schema";
 export * from "./retry-scan.schema";
 export * from "./poll-scan-status.schema";

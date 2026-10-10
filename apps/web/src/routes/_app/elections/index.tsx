@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Trash2, Play, Square, Pencil, BarChart3 } from "lucide-react";
+import { MoreHorizontal, Trash2, Play, Square, Pencil, BarChart3, X, FileText, Edit, ScanLine } from "lucide-react";
 import * as React from "react";
 import { z } from "zod";
 import { Link } from "@tanstack/react-router";
@@ -45,6 +45,13 @@ import {
   AlertDialogTitle
 } from "@signa/react-ui/components/ui/alert-dialog";
 import { Badge } from "@signa/react-ui/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@signa/react-ui/components/ui/select";
 
 export const Route = createFileRoute("/_app/elections/")({
   component: RouteComponent
@@ -79,11 +86,21 @@ function RouteComponent() {
   const [columnFilters, setColumnFilters] = React.useState<Array<{ id: string; value: unknown }>>(
     []
   );
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [statusFilter, setStatusFilter] = React.useState<Election["status"] | undefined>();
 
   const sortBy = sorting[0]?.id || "createdAt";
   const order = sorting[0]?.desc ? "desc" : "asc";
+
+  // Extract status filter from columnFilters
+  const statusFilter = React.useMemo(() => {
+    const filter = columnFilters.find((f) => f.id === "status");
+    return filter?.value as Election["status"] | undefined;
+  }, [columnFilters]);
+
+  // Extract search query from columnFilters
+  const searchQuery = React.useMemo(() => {
+    const filter = columnFilters.find((f) => f.id === "title");
+    return (filter?.value as string) || "";
+  }, [columnFilters]);
 
   const { data, isLoading } = useQuery(
     electionQueries.list({
@@ -97,6 +114,7 @@ function RouteComponent() {
     })
   );
 
+  // Client-side search filter (if backend doesn't support search)
   const filteredData = React.useMemo(() => {
     if (!data?.data) return [];
     if (!searchQuery) return data.data;
@@ -121,6 +139,14 @@ function RouteComponent() {
       cell: ({ row }) => {
         const status = row.getValue("status") as Election["status"];
         return <StatusBadge status={status} />;
+      }
+    },
+    {
+      accessorKey: "maxVoters",
+      header: "Số phiếu tối đa",
+      cell: ({ row }) => {
+        const maxVoters = row.getValue("maxVoters") as number | undefined;
+        return <div>{maxVoters ?? "—"}</div>;
       }
     },
     {
@@ -173,11 +199,36 @@ function RouteComponent() {
           onColumnFiltersChange={setColumnFilters}
           searchableColumns={[
             {
-              id: "search",
+              id: "title",
               title: "Tìm kiếm theo tiêu đề hoặc mô tả"
             }
           ]}
-          toolbarActions={<CreateElectionDialog />}
+          toolbarActions={
+            <>
+              <Select
+                value={statusFilter || "all"}
+                onValueChange={(value) => {
+                  const newFilters = columnFilters.filter((f) => f.id !== "status");
+                  if (value !== "all") {
+                    newFilters.push({ id: "status", value });
+                  }
+                  setColumnFilters(newFilters);
+                }}
+              >
+                <SelectTrigger className="h-8 w-[180px]">
+                  <SelectValue placeholder="Trạng thái" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                  <SelectItem value="draft">Nháp</SelectItem>
+                  <SelectItem value="active">Đang diễn ra</SelectItem>
+                  <SelectItem value="closed">Đã đóng</SelectItem>
+                  <SelectItem value="archived">Đã lưu trữ</SelectItem>
+                </SelectContent>
+              </Select>
+              <CreateElectionDialog />
+            </>
+          }
         />
       </div>
     </div>
@@ -282,6 +333,82 @@ function CreateElectionDialog() {
         </form.AppForm>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function EditElectionDialog({ election }: { election: Election }) {
+  const [open, setOpen] = React.useState(false);
+  const updateMutation = useMutation(electionMutations.update());
+
+  const form = useAppForm({
+    defaultValues: {
+      title: election.title,
+      description: election.description || "",
+      startDate: election.startDate,
+      endDate: election.endDate,
+      maxVoters: election.maxVoters
+    } satisfies ElectionFormValues as ElectionFormValues,
+    validators: {
+      onSubmit: electionFormSchema
+    },
+    onSubmit: async ({ value }) => {
+      await updateMutation.mutateAsync({
+        params: { id: election.id },
+        body: value
+      });
+      setOpen(false);
+    }
+  });
+
+  return (
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => setOpen(true)}>
+        <Edit className="mr-2 h-4 w-4" />
+        Chỉnh sửa
+      </DropdownMenuItem>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Chỉnh sửa cuộc bầu cử</AlertDialogTitle>
+          <AlertDialogDescription>
+            Cập nhật thông tin cuộc bầu cử <strong>{election.title}</strong>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <form.AppForm>
+          <form.Form className="space-y-4">
+            <form.AppField name="title">
+              {(field) => <field.Input label="Tiêu đề" placeholder="Bầu cử đại biểu 2026" />}
+            </form.AppField>
+
+            <form.AppField name="description">
+              {(field) => (
+                <field.Textarea label="Mô tả (tùy chọn)" placeholder="Mô tả về cuộc bầu cử" />
+              )}
+            </form.AppField>
+
+            <form.AppField name="startDate">
+              {(field) => <field.DatePicker label="Ngày bắt đầu (tùy chọn)" />}
+            </form.AppField>
+
+            <form.AppField name="endDate">
+              {(field) => <field.DatePicker label="Ngày kết thúc (tùy chọn)" />}
+            </form.AppField>
+
+            <form.AppField name="maxVoters">
+              {(field) => (
+                <field.Input label="Số lượng cử tri tối đa (tùy chọn)" placeholder="1000" />
+              )}
+            </form.AppField>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel>Hủy</AlertDialogCancel>
+              <form.Submit isPending={updateMutation.isPending}>
+                {updateMutation.isPending ? "Đang cập nhật..." : "Cập nhật"}
+              </form.Submit>
+            </AlertDialogFooter>
+          </form.Form>
+        </form.AppForm>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 
@@ -409,10 +536,29 @@ function ElectionActions({ election }: { election: Election }) {
         <DropdownMenuLabel>Hành động</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {election.status === "draft" && (
+          <>
+            <EditElectionDialog election={election} />
+            <DropdownMenuItem asChild>
+              <Link to="/elections/$id/builder" params={{ id: election.id }}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Thiết kế phiếu bầu
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
+        {election.status !== "draft" && (
           <DropdownMenuItem asChild>
-            <Link to="/elections/$id/builder" params={{ id: election.id }}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Thiết kế phiếu bầu
+            <Link to="/elections/$id/ballots" params={{ id: election.id }}>
+              <FileText className="mr-2 h-4 w-4" />
+              Quản lý phiếu bầu
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {election.status !== "draft" && (
+          <DropdownMenuItem asChild>
+            <Link to="/elections/$id/scans" params={{ id: election.id }}>
+              <ScanLine className="mr-2 h-4 w-4" />
+              Quản lý quét phiếu
             </Link>
           </DropdownMenuItem>
         )}

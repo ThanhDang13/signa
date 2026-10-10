@@ -11,6 +11,9 @@ export class OmrProcessingRequest extends BaseEntity {
   public readonly ballotId!: string;
 
   @Accessor({ readonly: true })
+  public readonly electionId!: string;
+
+  @Accessor({ readonly: true })
   public readonly userId!: string;
 
   @Accessor({ touchOnSet: true })
@@ -38,6 +41,7 @@ export class OmrProcessingRequest extends BaseEntity {
     props: {
       id: string;
       ballotId: string;
+      electionId: string;
       userId: string;
       s3Key: string;
       status: OmrRequestStatus;
@@ -52,6 +56,7 @@ export class OmrProcessingRequest extends BaseEntity {
     super(isNew);
     this.id = props.id;
     this.ballotId = props.ballotId;
+    this.electionId = props.electionId;
     this.userId = props.userId;
     this.s3Key = props.s3Key;
     this.status = props.status;
@@ -62,10 +67,11 @@ export class OmrProcessingRequest extends BaseEntity {
     this.processingStartedAt = props.processingStartedAt;
   }
 
-  static create(props: { ballotId: string; userId: string; s3Key: string }): OmrProcessingRequest {
+  static create(props: { ballotId: string; electionId: string; userId: string; s3Key: string }): OmrProcessingRequest {
     return new OmrProcessingRequest({
       id: uuidv7(),
       ballotId: props.ballotId,
+      electionId: props.electionId,
       userId: props.userId,
       s3Key: props.s3Key,
       status: "pending",
@@ -76,6 +82,7 @@ export class OmrProcessingRequest extends BaseEntity {
   static rehydrate(props: {
     id: string;
     ballotId: string;
+    electionId: string;
     userId: string;
     s3Key: string;
     status: OmrRequestStatus;
@@ -91,6 +98,7 @@ export class OmrProcessingRequest extends BaseEntity {
       {
         id: props.id,
         ballotId: props.ballotId,
+        electionId: props.electionId,
         userId: props.userId,
         s3Key: props.s3Key,
         status: props.status,

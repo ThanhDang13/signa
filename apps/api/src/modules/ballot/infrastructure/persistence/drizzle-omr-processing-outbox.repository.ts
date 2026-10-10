@@ -17,6 +17,7 @@ export class DrizzleOmrProcessingOutboxRepository implements OmrProcessingOutbox
     await this.db.insert(schemas.omrProcessingOutbox).values({
       id: request.id,
       ballotId: request.ballotId,
+      electionId: request.electionId,
       userId: request.userId,
       s3Key: request.s3Key,
       status: request.status,
@@ -41,6 +42,7 @@ export class DrizzleOmrProcessingOutboxRepository implements OmrProcessingOutbox
       OmrProcessingRequest.rehydrate({
         id: row.id,
         ballotId: row.ballotId,
+        electionId: row.electionId,
         userId: row.userId,
         s3Key: row.s3Key,
         status: row.status as any,
@@ -66,6 +68,7 @@ export class DrizzleOmrProcessingOutboxRepository implements OmrProcessingOutbox
       OmrProcessingRequest.rehydrate({
         id: row.id,
         ballotId: row.ballotId,
+        electionId: row.electionId,
         userId: row.userId,
         s3Key: row.s3Key,
         status: row.status as any,
@@ -109,6 +112,7 @@ export class DrizzleOmrProcessingOutboxRepository implements OmrProcessingOutbox
     return OmrProcessingRequest.rehydrate({
       id: row.id,
       ballotId: row.ballotId,
+      electionId: row.electionId,
       userId: row.userId,
       s3Key: row.s3Key,
       status: row.status as any,
@@ -136,6 +140,7 @@ export class DrizzleOmrProcessingOutboxRepository implements OmrProcessingOutbox
     return OmrProcessingRequest.rehydrate({
       id: row.id,
       ballotId: row.ballotId,
+      electionId: row.electionId,
       userId: row.userId,
       s3Key: row.s3Key,
       status: row.status as any,
@@ -162,6 +167,7 @@ export class DrizzleOmrProcessingOutboxRepository implements OmrProcessingOutbox
     return OmrProcessingRequest.rehydrate({
       id: row.id,
       ballotId: row.ballotId,
+      electionId: row.electionId,
       userId: row.userId,
       s3Key: row.s3Key,
       status: row.status as any,
@@ -188,6 +194,7 @@ export class DrizzleOmrProcessingOutboxRepository implements OmrProcessingOutbox
       OmrProcessingRequest.rehydrate({
         id: row.id,
         ballotId: row.ballotId,
+        electionId: row.electionId,
         userId: row.userId,
         s3Key: row.s3Key,
         status: row.status as any,

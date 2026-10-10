@@ -4,3 +4,4 @@ export * from "./election-actions.schema";
 export * from "./get-election.schema";
 export * from "./list-elections.schema";
 export * from "./get-election-results.schema";
+export * from "./get-dashboard-stats.schema";

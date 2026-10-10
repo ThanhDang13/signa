@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { eq } from "drizzle-orm";
+import { eq, count } from "drizzle-orm";
 import { InjectDatabase } from "@signa/nest-drizzle";
 import * as schemas from "@signa/runtime-drizzle/schemas";
 import { Ballot } from "@signa/api/modules/ballot/domain/entities";
@@ -92,6 +92,15 @@ export class DrizzleBallotRepository implements BallotRepository {
         updatedAt: row.updatedAt
       })
     );
+  }
+
+  async countByElectionId(electionId: string): Promise<number> {
+    const result = await this.db
+      .select({ count: count() })
+      .from(schemas.ballots)
+      .where(eq(schemas.ballots.electionId, electionId));
+
+    return result[0]?.count ?? 0;
   }
 
   async save(ballot: Ballot): Promise<void> {

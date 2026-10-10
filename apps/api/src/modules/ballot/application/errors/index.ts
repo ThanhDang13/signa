@@ -5,3 +5,6 @@ export * from "./scan-request-forbidden.error";
 export * from "./scan-already-active.error";
 export * from "./ballot-already-voted.error";
 export * from "./retry-not-allowed.error";
+export * from "./ballot-batch-not-found.error";
+export * from "./ballot-batch-pdf-not-ready.error";
+export * from "./max-voters-exceeded.error";

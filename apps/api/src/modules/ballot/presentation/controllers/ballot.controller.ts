@@ -10,9 +10,13 @@ import {
   getBallotContract,
   listBallotsContract,
   listScanRequestsContract,
+  adminListScanRequestsContract,
   getScanRequestContract,
   retryScanContract,
-  pollScanStatusContract
+  pollScanStatusContract,
+  listBallotBatchesContract,
+  getBallotBatchContract,
+  getBallotBatchDownloadContract
 } from "@signa/contracts-http/ballot";
 import {
   GenerateBallotsCommand,
@@ -52,6 +56,10 @@ import {
   ListScanRequestsOutputDto
 } from "@signa/api/modules/ballot/presentation/dto/list-scan-requests.dto";
 import {
+  AdminListScanRequestsQueryDto,
+  AdminListScanRequestsOutputDto
+} from "@signa/api/modules/ballot/presentation/dto/admin-list-scan-requests.dto";
+import {
   GetScanRequestParamsDto,
   GetScanRequestOutputDto
 } from "@signa/api/modules/ballot/presentation/dto/get-scan-request.dto";
@@ -63,6 +71,19 @@ import {
   RetryScanInputDto,
   RetryScanOutputDto
 } from "@signa/api/modules/ballot/presentation/dto/retry-scan.dto";
+import {
+  ListBallotBatchesParamsDto,
+  ListBallotBatchesQueryDto,
+  ListBallotBatchesOutputDto
+} from "@signa/api/modules/ballot/presentation/dto/list-ballot-batches.dto";
+import {
+  GetBallotBatchParamsDto,
+  GetBallotBatchOutputDto
+} from "@signa/api/modules/ballot/presentation/dto/get-ballot-batch.dto";
+import {
+  GetBallotBatchDownloadParamsDto,
+  GetBallotBatchDownloadOutputDto
+} from "@signa/api/modules/ballot/presentation/dto/get-ballot-batch-download.dto";
 import { Protected } from "@signa/api/core/security/decorator";
 import { CurrentUser, type JwtPayload } from "@signa/nest-jwt";
 import {
@@ -70,7 +91,10 @@ import {
   ListBallotsQuery,
   GetScanRequestQuery,
   ListScanRequestsQuery,
-  PollScanStatusQuery
+  PollScanStatusQuery,
+  ListBallotBatchesQuery,
+  GetBallotBatchQuery,
+  GetBallotBatchDownloadQuery
 } from "@signa/api/modules/ballot/application/queries";
 
 const GenerateBallotsRoute = ContractRoute(generateBallotsContract, {
@@ -101,6 +125,10 @@ const ListScanRequestsRoute = ContractRoute(listScanRequestsContract, {
   summary: "List user's scan requests"
 });
 
+const AdminListScanRequestsRoute = ContractRoute(adminListScanRequestsContract, {
+  summary: "Admin - List scan requests with optional election filter"
+});
+
 const GetScanRequestRoute = ContractRoute(getScanRequestContract, {
   summary: "Get scan request by ID for polling"
 });
@@ -111,6 +139,18 @@ const PollScanStatusRoute = ContractRoute(pollScanStatusContract, {
 
 const RetryScanRoute = ContractRoute(retryScanContract, {
   summary: "Retry a failed or rejected scan request"
+});
+
+const ListBallotBatchesRoute = ContractRoute(listBallotBatchesContract, {
+  summary: "List ballot generation batches for an election"
+});
+
+const GetBallotBatchRoute = ContractRoute(getBallotBatchContract, {
+  summary: "Get ballot batch by ID"
+});
+
+const GetBallotBatchDownloadRoute = ContractRoute(getBallotBatchDownloadContract, {
+  summary: "Get download URL for ballot batch PDF"
 });
 
 @ApiTags("BALLOTS")
@@ -221,6 +261,21 @@ export class BallotController {
     );
   }
 
+  @AdminListScanRequestsRoute
+  @Protected()
+  @Response({ type: AdminListScanRequestsOutputDto })
+  @HttpCode(HttpStatus.OK)
+  async adminListScanRequests(@Query() query: AdminListScanRequestsQueryDto) {
+    return this.queryBus.execute(
+      new ListScanRequestsQuery({
+        electionId: query.electionId,
+        pageIndex: query.pageIndex,
+        pageSize: query.pageSize,
+        status: query.status
+      })
+    );
+  }
+
   @GetScanRequestRoute
   @Protected()
   @Response({ type: GetScanRequestOutputDto })
@@ -260,6 +315,53 @@ export class BallotController {
         requestId: params.requestId,
         s3Key: dto.s3Key,
         userId: user.id
+      })
+    );
+  }
+
+  @ListBallotBatchesRoute
+  @Protected()
+  @Response({ type: ListBallotBatchesOutputDto })
+  @HttpCode(HttpStatus.OK)
+  async listBallotBatches(
+    @Param() params: ListBallotBatchesParamsDto,
+    @Query() query: ListBallotBatchesQueryDto,
+    @CurrentUser() user: JwtPayload
+  ) {
+    return this.queryBus.execute(
+      new ListBallotBatchesQuery({
+        electionId: params.electionId,
+        pageIndex: query.pageIndex,
+        pageSize: query.pageSize,
+        sortBy: query.sortBy,
+        order: query.order
+      })
+    );
+  }
+
+  @GetBallotBatchRoute
+  @Protected()
+  @Response({ type: GetBallotBatchOutputDto })
+  @HttpCode(HttpStatus.OK)
+  async getBallotBatch(@Param() params: GetBallotBatchParamsDto, @CurrentUser() user: JwtPayload) {
+    return this.queryBus.execute(
+      new GetBallotBatchQuery({
+        batchId: params.batchId
+      })
+    );
+  }
+
+  @GetBallotBatchDownloadRoute
+  @Protected()
+  @Response({ type: GetBallotBatchDownloadOutputDto })
+  @HttpCode(HttpStatus.OK)
+  async getBallotBatchDownload(
+    @Param() params: GetBallotBatchDownloadParamsDto,
+    @CurrentUser() user: JwtPayload
+  ) {
+    return this.queryBus.execute(
+      new GetBallotBatchDownloadQuery({
+        batchId: params.batchId
       })
     );
   }
