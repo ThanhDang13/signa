@@ -32,7 +32,7 @@
     // "**/node_modules": true,
     // "**/build": true,s
     // "**/dist": true,
-    "**/.codegraph": true,
+    // "**/.codegraph": true,
     "**/.agents": true
   },
   "search.followSymlinks": false,
