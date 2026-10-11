@@ -63,9 +63,7 @@ import {
   GetScanRequestParamsDto,
   GetScanRequestOutputDto
 } from "@signa/api/modules/ballot/presentation/dto/get-scan-request.dto";
-import {
-  PollScanStatusOutputDto
-} from "@signa/api/modules/ballot/presentation/dto/poll-scan-status.dto";
+import { PollScanStatusOutputDto } from "@signa/api/modules/ballot/presentation/dto/poll-scan-status.dto";
 import {
   RetryScanParamsDto,
   RetryScanInputDto,
@@ -96,6 +94,8 @@ import {
   GetBallotBatchQuery,
   GetBallotBatchDownloadQuery
 } from "@signa/api/modules/ballot/application/queries";
+import { Policy } from "@signa/nest-policy";
+import { isAdmin } from "@signa/api/core/policy";
 
 const GenerateBallotsRoute = ContractRoute(generateBallotsContract, {
   summary: "Generate ballots for an election (async)"
@@ -163,6 +163,7 @@ export class BallotController {
 
   @GenerateBallotsRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: GenerateBallotsOutputDto })
   @HttpCode(HttpStatus.ACCEPTED)
   async generate(@Body() dto: GenerateBallotsInputDto, @CurrentUser() user: JwtPayload) {
@@ -176,6 +177,7 @@ export class BallotController {
 
   @PreviewBallotRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: PreviewBallotOutputDto })
   @HttpCode(HttpStatus.OK)
   async preview(@Body() dto: PreviewBallotInputDto, @CurrentUser() user: JwtPayload) {
@@ -251,7 +253,10 @@ export class BallotController {
   @Protected()
   @Response({ type: ListScanRequestsOutputDto })
   @HttpCode(HttpStatus.OK)
-  async listScanRequests(@Query() query: ListScanRequestsQueryDto, @CurrentUser() user: JwtPayload) {
+  async listScanRequests(
+    @Query() query: ListScanRequestsQueryDto,
+    @CurrentUser() user: JwtPayload
+  ) {
     return this.queryBus.execute(
       new ListScanRequestsQuery({
         userId: user.id,
@@ -263,6 +268,7 @@ export class BallotController {
 
   @AdminListScanRequestsRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: AdminListScanRequestsOutputDto })
   @HttpCode(HttpStatus.OK)
   async adminListScanRequests(@Query() query: AdminListScanRequestsQueryDto) {
@@ -321,6 +327,7 @@ export class BallotController {
 
   @ListBallotBatchesRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: ListBallotBatchesOutputDto })
   @HttpCode(HttpStatus.OK)
   async listBallotBatches(
@@ -341,6 +348,7 @@ export class BallotController {
 
   @GetBallotBatchRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: GetBallotBatchOutputDto })
   @HttpCode(HttpStatus.OK)
   async getBallotBatch(@Param() params: GetBallotBatchParamsDto, @CurrentUser() user: JwtPayload) {
@@ -353,6 +361,7 @@ export class BallotController {
 
   @GetBallotBatchDownloadRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: GetBallotBatchDownloadOutputDto })
   @HttpCode(HttpStatus.OK)
   async getBallotBatchDownload(

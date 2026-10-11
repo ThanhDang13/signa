@@ -47,6 +47,8 @@ import {
   ResetClerkPasswordOutputDto
 } from "@signa/api/modules/identity/presentation/dto/reset-clerk-password.dto";
 import { Protected } from "@signa/api/core/security/decorator";
+import { Policy } from "@signa/nest-policy";
+import { isAdmin } from "@signa/api/core/policy";
 
 const CreateClerkRoute = ContractRoute(createClerkContract, {
   summary: "Create a new clerk"
@@ -82,6 +84,7 @@ export class ClerkController {
 
   @CreateClerkRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: CreateClerkOutputDto })
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateClerkInputDto) {
@@ -96,6 +99,7 @@ export class ClerkController {
 
   @ListClerksRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: ListClerksOutputDto })
   @HttpCode(HttpStatus.OK)
   async list(@Query() query: ListClerksQueryDto) {
@@ -111,6 +115,7 @@ export class ClerkController {
 
   @GetClerkRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: GetClerkOutputDto })
   @HttpCode(HttpStatus.OK)
   async getOne(@Param() params: GetClerkParamsDto) {
@@ -123,6 +128,7 @@ export class ClerkController {
 
   @UpdateClerkRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: UpdateClerkOutputDto })
   @HttpCode(HttpStatus.OK)
   async update(@Param() params: UpdateClerkParamsDto, @Body() dto: UpdateClerkInputDto) {
@@ -137,6 +143,7 @@ export class ClerkController {
 
   @DeleteClerkRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: DeleteClerkOutputDto })
   @HttpCode(HttpStatus.OK)
   async delete(@Param() params: DeleteClerkParamsDto) {
@@ -149,6 +156,7 @@ export class ClerkController {
 
   @ResetClerkPasswordRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: ResetClerkPasswordOutputDto })
   @HttpCode(HttpStatus.OK)
   async resetPassword(

@@ -12,10 +12,14 @@ import { TestModule } from "@signa/api/modules/test/test.module";
 import { ContractModule } from "@signa/nest-contract";
 import { ElectionModule } from "@signa/api/modules/election/election.module";
 import { BallotModule } from "@signa/api/modules/ballot/ballot.module";
+import { PolicyModule } from "@signa/nest-policy";
+import { PolicyConfigModule } from "@signa/api/core/policy";
 
 @Module({
   imports: [
     CqrsModule.forRoot(),
+    PolicyModule,
+    PolicyConfigModule,
     ContractModule,
     ConfigModule,
     ErrorModule,
@@ -33,3 +37,4 @@ import { BallotModule } from "@signa/api/modules/ballot/ballot.module";
   controllers: []
 })
 export class AppModule {}
+

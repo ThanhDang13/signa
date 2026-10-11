@@ -53,9 +53,7 @@ import {
   ListElectionsQueryDto,
   ListElectionsOutputDto
 } from "@signa/api/modules/election/presentation/dto/list-elections.dto";
-import {
-  GetDashboardStatsOutputDto
-} from "@signa/api/modules/election/presentation/dto/get-dashboard-stats.dto";
+import { GetDashboardStatsOutputDto } from "@signa/api/modules/election/presentation/dto/get-dashboard-stats.dto";
 import { Protected } from "@signa/api/core/security/decorator";
 import { CurrentUser, type JwtPayload } from "@signa/nest-jwt";
 import {
@@ -64,6 +62,8 @@ import {
   ListElectionsQuery,
   GetDashboardStatsQuery
 } from "@signa/api/modules/election/application/queries";
+import { Policy } from "@signa/nest-policy";
+import { isAdmin } from "@signa/api/core/policy";
 
 const CreateElectionRoute = ContractRoute(createElectionContract, {
   summary: "Create a new election"
@@ -111,6 +111,7 @@ export class ElectionController {
 
   @CreateElectionRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: CreateElectionOutputDto })
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateElectionInputDto, @CurrentUser() user: JwtPayload) {
@@ -129,6 +130,7 @@ export class ElectionController {
 
   @UpdateElectionRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: UpdateElectionOutputDto })
   @HttpCode(HttpStatus.OK)
   async update(
@@ -151,6 +153,7 @@ export class ElectionController {
 
   @ActivateElectionRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: ActivateElectionOutputDto })
   @HttpCode(HttpStatus.OK)
   async activate(@Param() params: ActivateElectionParamsDto, @CurrentUser() user: JwtPayload) {
@@ -159,6 +162,7 @@ export class ElectionController {
 
   @CloseElectionRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: CloseElectionOutputDto })
   @HttpCode(HttpStatus.OK)
   async close(@Param() params: CloseElectionParamsDto, @CurrentUser() user: JwtPayload) {
@@ -167,6 +171,7 @@ export class ElectionController {
 
   @DeleteElectionRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: DeleteElectionOutputDto })
   @HttpCode(HttpStatus.OK)
   async delete(@Param() params: DeleteElectionParamsDto, @CurrentUser() user: JwtPayload) {
@@ -183,6 +188,7 @@ export class ElectionController {
 
   @ListElectionsRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: ListElectionsOutputDto })
   @HttpCode(HttpStatus.OK)
   async list(@Query() query: ListElectionsQueryDto, @CurrentUser() user: JwtPayload) {
@@ -200,6 +206,7 @@ export class ElectionController {
 
   @GetElectionResultsRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: GetElectionResultsOutputDto })
   @HttpCode(HttpStatus.OK)
   async getResults(@Param() params: GetElectionResultsParamsDto, @CurrentUser() user: JwtPayload) {
@@ -208,6 +215,7 @@ export class ElectionController {
 
   @GetDashboardStatsRoute
   @Protected()
+  @Policy(isAdmin)
   @Response({ type: GetDashboardStatsOutputDto })
   @HttpCode(HttpStatus.OK)
   async getDashboardStats(@CurrentUser() user: JwtPayload) {
