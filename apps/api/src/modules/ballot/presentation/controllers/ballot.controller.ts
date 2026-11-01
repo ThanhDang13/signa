@@ -96,6 +96,7 @@ import {
 } from "@signa/api/modules/ballot/application/queries";
 import { Policy } from "@signa/nest-policy";
 import { isAdmin } from "@signa/api/core/policy";
+import { ROLES } from "@signa/shared";
 
 const GenerateBallotsRoute = ContractRoute(generateBallotsContract, {
   summary: "Generate ballots for an election (async)"
@@ -290,7 +291,8 @@ export class BallotController {
     return this.queryBus.execute(
       new GetScanRequestQuery({
         requestId: params.requestId,
-        userId: user.id
+        userId: user.id,
+        isAdmin: user.roles.includes(ROLES.SUPER_ADMIN)
       })
     );
   }

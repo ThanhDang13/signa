@@ -21,7 +21,7 @@ export class GetScanRequestHandler implements IQueryHandler<GetScanRequestQuery>
   ) {}
 
   async execute(query: GetScanRequestQuery) {
-    const { requestId, userId } = query.payload;
+    const { requestId, userId, isAdmin } = query.payload;
 
     // Query outbox with LEFT JOIN to result
     const rows = await this.db
@@ -60,7 +60,7 @@ export class GetScanRequestHandler implements IQueryHandler<GetScanRequestQuery>
     }
 
     // Ownership check
-    if (row.userId !== userId) {
+    if (row.userId !== userId && !isAdmin) {
       throw createScanRequestForbiddenError();
     }
 
