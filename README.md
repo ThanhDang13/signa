@@ -232,7 +232,7 @@ async handleOmrResult(result: JobResult<ScanResult>) {
 ## Tech Stack
 
 ### Frontend
-- **Web**: React 18, TanStack Router v1 (file-based routing), TanStack Query, Shadcn UI, Tailwind CSS
+- **Web**: React 19, TanStack Router v1 (file-based routing), TanStack Query, Shadcn UI, Tailwind CSS
 - **Mobile**: React Native, Expo 51, Expo Camera, NativeWind, Expo Router
 
 ### Backend
